@@ -103,7 +103,8 @@ int main() {
   // This is where the tests are actually run!
   CU_basic_run_tests();
 
+  unsigned int fails= CU_get_number_of_failures();
   // Tear down CUnit before exiting
   CU_cleanup_registry();
-  return CU_get_error();
+  return fails == 0? 0:1;
 }
