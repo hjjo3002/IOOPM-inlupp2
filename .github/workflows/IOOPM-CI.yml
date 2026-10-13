@@ -1,0 +1,20 @@
+name: IOOPM CI
+
+on: push
+
+jobs:
+  cunit-test:
+    runs-on: ubuntu-lastest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install CUnit
+        run: sudo apt-get update && sudo apt-get install -y libcunit1-dev
+
+      - name: Build tests
+        run: make compile_test
+
+      - name: Run tests
+        run: ./compile_test
+    
