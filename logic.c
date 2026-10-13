@@ -36,15 +36,24 @@ struct database
     ioopm_hash_table_t *carts;
 };
 
-item_t *create_item(char* name, char* desc, size_t price, ioopm_list_t *shelfs){
+item_t *create_item(char* name, char* desc, size_t price){
     item_t *item = calloc(1,sizeof(item_t));
     item->name = name;
     item->desc = desc;
     item->price = price;
-    item->shelfs = shelfs;
-
+    
     return item;
 }
+
+bool item_exists(item_t *item, database_t *db){
+    ioopm_hash_table_t *item_ht = db->items; 
+    value_t key = PTR_AS_ELEM(item->name); 
+    value_t result;
+
+    return ioopm_hash_table_lookup(item_ht, key, &result);
+}
+
+
 
 database_t *create_database(){
     database_t *db = calloc(1,sizeof(database_t));

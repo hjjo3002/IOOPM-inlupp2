@@ -8,8 +8,6 @@ VALGRIND = valgrind
 COVERAGE = gcovr -r .
 
 
-
-
 logic: datastruct.c logic.c 
 	$(CC) $(CFLAGS) -c logic.c 
 
@@ -30,7 +28,9 @@ all: compile_test
 
 clean:
 	rm -f *.o 
+	rm -f compile_test
 	rm -f *.gcda *.gcno *.gcov
 	rm -f gmon.out profile.txt
 
 .PHONY: clean valgrind test all 
+
