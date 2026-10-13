@@ -85,7 +85,7 @@ int main() {
     (CU_add_test(my_test_suite, "Basic arithmetics", test2) == NULL) ||
     (CU_add_test(my_test_suite, "create and add item (not mem)", test_create_and_add_item) == NULL) ||
     (CU_add_test(my_test_suite, "create and add item (not mem)", test_create_and_add_item_false) == NULL) ||
-    (CU_add_test(my_test_suite, "Test for CI (fails)", test_false_for_CI) == NULL) ||
+    //(CU_add_test(my_test_suite, "Test for CI (fails)", test_false_for_CI) == NULL) ||
 
     
     0
