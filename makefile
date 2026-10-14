@@ -8,8 +8,12 @@ VALGRIND = valgrind
 COVERAGE = gcovr -r .
 
 
+
 logic: datastruct.c logic.c 
 	$(CC) $(CFLAGS) -c logic.c 
+
+ui: datastruct.c ui.c
+	$(CC) $(CFLAGS) -c ui.c 
 
 #skapa .o filer
 %.o: %.c %.h 

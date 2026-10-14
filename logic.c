@@ -38,22 +38,21 @@ struct database
 
 item_t *create_item(char* name, char* desc, size_t price){
     item_t *item = calloc(1,sizeof(item_t));
+    ioopm_list_t *shelfs_for_item = ioopm_list_create(); //use this for gdb segfault 
     item->name = name;
     item->desc = desc;
     item->price = price;
-    
+    item->shelfs = shelfs_for_item;
     return item;
 }
 
-bool item_exists(item_t *item, database_t *db){
+bool item_exists(char* name, database_t *db){
     ioopm_hash_table_t *item_ht = db->items; 
-    value_t key = PTR_AS_ELEM(item->name); 
+    value_t key = PTR_AS_ELEM(name); 
     value_t result;
 
     return ioopm_hash_table_lookup(item_ht, key, &result);
 }
-
-
 
 database_t *create_database(){
     database_t *db = calloc(1,sizeof(database_t));
@@ -113,20 +112,23 @@ static bool remove_from_shelfs(item_t *item, database_t *db){
 } 
 //helper free item
 static void free_item(item_t *item){
-    free(item->name);
-    free(item->desc);
+    //free(item->name);
+    //free(item->desc);
     free(item);
 }
 
 bool remove_merch(item_t *item, database_t *db){
-    if(remove_from_items(item,db) && remove_from_shelfs(item,db)){
-        free_item(item);
-        return true;
+    if(remove_from_items(item,db)){
+
+        if(remove_from_shelfs(item,db)){
+
+            free_item(item);
+            return true;
+        }
+        else{return false;}
     }
     else{return false;}
-
     //TODO free mem
-
 }
 
 void edit_merch(){

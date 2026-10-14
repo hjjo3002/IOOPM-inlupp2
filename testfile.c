@@ -18,8 +18,6 @@ int clean_suite(void) {
 
 
 
-
-
 // These are example test functions. You should replace them with
 // functions of your own.
 void test1(void) {
@@ -38,25 +36,36 @@ void test_create_and_add_item(){
   
   item_t *item1 = create_item(name,desc,price);
   add_merch(item1,db);
-  CU_ASSERT_TRUE(item_exists(item1,db));
+  CU_ASSERT_TRUE(item_exists(name,db));
 }
 
 void test_create_and_add_item_false(){
   database_t *db = create_database();
   char* name = "tröja";
-  char* desc = "str L";
-  int price = 200;
   
-  item_t *item1 = create_item(name,desc,price);
-  //add_merch(item1,db);
-  CU_ASSERT_FALSE(item_exists(item1,db));
+  CU_ASSERT_FALSE(item_exists(name,db));
 }
 
 void test_false_for_CI(){
   CU_ASSERT_EQUAL(true,false);
 }
 
+void test_add_and_remove(){
+  database_t *db = create_database();
+  char* name = "tröja";
+  char* desc = "str L";
+  int price = 200;
+  
+  item_t *item1 = create_item(name,desc,price);
+  add_merch(item1,db);
+  CU_ASSERT_TRUE(item_exists(name,db));
 
+  remove_merch(item1,db);
+  CU_ASSERT_FALSE(item_exists(name,db)); //segfault 
+  // printf("%p",item1);
+  // CU_ASSERT_PTR_NULL(item1);
+
+}
 
 
 
@@ -86,7 +95,8 @@ int main() {
     (CU_add_test(my_test_suite, "create and add item (not mem)", test_create_and_add_item) == NULL) ||
     (CU_add_test(my_test_suite, "create and add item (not mem)", test_create_and_add_item_false) == NULL) ||
     //(CU_add_test(my_test_suite, "Test for CI (fails)", test_false_for_CI) == NULL) ||
-
+    (CU_add_test(my_test_suite, "add and remove", test_add_and_remove) == NULL) ||
+    //segfault on add_and_remove
     
     0
   )

@@ -11,7 +11,7 @@ typedef struct database database_t;
 
 item_t *create_item(char* name, char* desc, size_t price);
 
-bool item_exists(item_t *item, database_t *db);
+bool item_exists(char* name, database_t *db);
 
 database_t *create_database();
 
