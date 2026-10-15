@@ -43,6 +43,7 @@ item_t *create_item(char* name, char* desc, size_t price){
     item->desc = desc;
     item->price = price;
     item->shelfs = shelfs_for_item;
+
     return item;
 }
 
@@ -64,22 +65,6 @@ database_t *create_database(){
     return db;
 }
 
-void add_merch(item_t *item, database_t *db){
-    //TODO check merch must be new
-    //add to items
-   ioopm_hash_table_insert(db->items,PTR_AS_ELEM(item->name),PTR_AS_ELEM(item));
-}
-
-void list_merch(ioopm_hash_table_t *ht){
-    //TODO prints (alphabetical order) items in ht items (not 20 at a time, ui's task)
-    char** arr = hashkey_to_array(ht); 
-    size_t count=ioopm_hash_table_size(ht);
-
-    for(size_t i=0;i!=count;i++){
-        printf("%zu. %s\n",i,arr[i]);
-    }
-    free(arr);
-}
 
 //helper for remove merch, does not free
 static bool remove_from_items(item_t *item, database_t *db){
@@ -117,6 +102,46 @@ static void free_item(item_t *item){
     free(item);
 }
 
+
+static item_t *edit_item(item_t *item, char* new_name, char* new_desc, int new_price){
+    item->name = new_name;
+    item->desc = new_desc;
+    item->price = new_price;
+
+    return item;
+}
+
+static void edit_ht_items(item_t *item, database_t *db, char* new_name, char* new_desc, int new_price){
+    //TODO check if new item not in items and not to change to alreday existing item, (make sure remove is true)
+    value_t result; 
+    ioopm_hash_table_t *items = db->items;
+    ioopm_hash_table_remove(items,PTR_AS_ELEM(item->name),&result);
+
+    edit_item(item,new_name,new_desc,new_price);
+    ioopm_hash_table_insert(items,PTR_AS_ELEM(item->name),PTR_AS_ELEM(item)); 
+}
+
+static void edit_shelfs(){
+
+}
+
+void add_merch(item_t *item, database_t *db){
+    //TODO check merch must be new
+    //add to items
+   ioopm_hash_table_insert(db->items,PTR_AS_ELEM(item->name),PTR_AS_ELEM(item));
+}
+
+void list_merch(ioopm_hash_table_t *ht){
+    //TODO prints (alphabetical order) items in ht items (not 20 at a time, ui's task)
+    char** arr = hashkey_to_array(ht); 
+    size_t count=ioopm_hash_table_size(ht);
+
+    for(size_t i=0;i!=count;i++){
+        printf("%zu. %s\n",i,arr[i]);
+    }
+    free(arr);
+}
+
 bool remove_merch(item_t *item, database_t *db){
     if(remove_from_items(item,db)){
 
@@ -131,12 +156,17 @@ bool remove_merch(item_t *item, database_t *db){
     //TODO free mem
 }
 
-void edit_merch(){
-    //TODO
+void edit_merch(item_t *old_item, database_t *db, char* new_name, char* new_desc, int new_price){
+    //TODO edit in items, if edit name -> change key in shelfs. 
+    edit_ht_items(old_item, db, new_name, new_desc, new_price);
+
+    edit_shelfs();
+
 }
 
 void show_stock(){
     //TODO
+    //puts("hej");
 }
 
 void create_cart(){
