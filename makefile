@@ -26,7 +26,7 @@ test: compile_test
 	./compile_test
 
 valgrind: compile_test
-	valgrind ./compile_test
+	valgrind --leak-check=full ./compile_test 
 
 all: compile_test
 

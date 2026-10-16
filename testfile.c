@@ -34,9 +34,11 @@ void test_create_and_add_item(){
   char* desc = "str L";
   int price = 200;
   
-  item_t *item1 = create_item(name,desc,price);
+  item_t *item1 = create_item(strdup(name),strdup(desc),price);
   add_merch(item1,db);
   CU_ASSERT_TRUE(item_exists(name,db));
+  database_destroy(db);
+
 }
 
 void test_create_and_add_item_false(){
@@ -44,10 +46,13 @@ void test_create_and_add_item_false(){
   char* name = "tröja";
   
   CU_ASSERT_FALSE(item_exists(name,db));
+  database_destroy(db);
+
 }
 
 void test_false_for_CI(){
   CU_ASSERT_EQUAL(true,false);
+  
 }
 
 void test_add_and_remove(){
@@ -56,7 +61,7 @@ void test_add_and_remove(){
   char* desc = "str L";
   int price = 200;
   
-  item_t *item1 = create_item(name,desc,price);
+  item_t *item1 = create_item(strdup(name),strdup(desc),price);
   add_merch(item1,db);
   CU_ASSERT_TRUE(item_exists(name,db));
 
@@ -64,8 +69,32 @@ void test_add_and_remove(){
   CU_ASSERT_FALSE(item_exists(name,db));
   // printf("%p",item1);
   // CU_ASSERT_PTR_NULL(item1);
+  database_destroy(db);
 
 }
+
+void test_edit_merch(){
+  database_t *db = create_database();
+  char* name = "tröja";
+  char* desc = "str L";
+  int price = 200;
+  
+  item_t *item1 = create_item(strdup(name),strdup(desc),price);
+  add_merch(item1,db);
+  CU_ASSERT_TRUE(item_exists(name,db));
+
+  char* new_name = "tshirt";
+  char* new_desc = "avklippt hoodie";
+  int new_price = 99;
+
+  edit_merch(item1, db, strdup(new_name), strdup(new_desc), new_price);
+  CU_ASSERT_TRUE(item_exists(new_name,db));
+  CU_ASSERT_FALSE(item_exists(name,db));
+  
+  //list_merch(db);
+  database_destroy(db);
+}
+
 
 
 
@@ -97,6 +126,7 @@ int main() {
     //(CU_add_test(my_test_suite, "Test for CI (fails)", test_false_for_CI) == NULL) ||
     (CU_add_test(my_test_suite, "add and remove", test_add_and_remove) == NULL) ||
     //segfault on add_and_remove
+    (CU_add_test(my_test_suite, "edit merch", test_edit_merch) == NULL) ||
     
     0
   )

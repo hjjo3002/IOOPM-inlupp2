@@ -27,5 +27,4 @@ bool not_empty(char *str);
 
 answer_t ask_question(char *question, check_func *check,convert_func *con);
 
-char** hashkey_to_array(ioopm_hash_table_t *ht);
-
+int compare_str_alphabetical(const void *a, const void *b);

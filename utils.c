@@ -1,6 +1,5 @@
 #include "utils.h"
 
-extern char *strdup(const char *);
 
 int read_string(char *buf, int buf_siz)
 {
@@ -92,21 +91,3 @@ int compare_str_alphabetical(const void *a, const void *b){
     return strcmp(*(const char**)a, *(const char**)b);
 }
 
-char** hashkey_to_array(ioopm_hash_table_t *ht){
-    ioopm_hash_table_iterator_t *it = ioopm_hash_table_iterator_create(ht);
-    size_t count = ioopm_hash_table_size(ht);
-
-    char** arr = calloc(count,sizeof(char*));
-
-    for(size_t i = 0; !ioopm_hash_table_iterator_at_end(it); i++){
-
-        value_t key = ioopm_hash_table_iterator_current_key(it);
-        arr[i] = key.p;
-
-        ioopm_hash_table_iterator_advance(it);
-    }
-    qsort(arr,count,sizeof(const char*),compare_str_alphabetical);
-
-    ioopm_hash_table_iterator_destroy(it);
-    return arr;
-}
