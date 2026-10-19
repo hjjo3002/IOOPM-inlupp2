@@ -227,6 +227,33 @@ static shelf_t** linked_list_sorted(ioopm_list_t *l){
     return arr;
 }
 
+static bool new_shelf_bigger_quantity(item_t *item, shelf_t *upd_shelf)
+{
+    size_t new_shelf_quantity = upd_shelf->quantity;
+    char *place_of_item = upd_shelf->place;
+
+    ioopm_list_iterator_t *it = ioopm_list_iterator_create(item->shelfs);
+
+    while (!ioopm_list_iterator_at_end(it))
+    {
+        value_t current = ioopm_list_iterator_current(it);
+        shelf_t *current_shelf = current.p;
+
+        if (strcmp(current_shelf->place, place_of_item) == 0)
+        {
+            bool result = current_shelf->quantity < new_shelf_quantity;
+
+            ioopm_list_iterator_destroy(it);
+            return result;
+        }
+
+        ioopm_list_iterator_advance(it);
+    }
+
+    ioopm_list_iterator_destroy(it);
+    return false;
+}
+
 
 
 bool add_merch(item_t *item, database_t *db){
@@ -234,6 +261,7 @@ bool add_merch(item_t *item, database_t *db){
    char* name_check = item->name;
 
    if(ioopm_hash_table_has_key(items,PTR_AS_ELEM(name_check))){
+    free_item(item);
     return false;
    }
 
@@ -297,6 +325,32 @@ void show_stock(item_t *item){
         printf("%s, %zu st",arr[i]->place, arr[i]->quantity);
     }
     free(arr);
+}
+
+bool replenish(item_t *item, shelf_t *upd_shelf, database_t *db){
+    //check shelf->place is empty or same item_t
+    char* place_in_shelfs = upd_shelf->place;
+    ioopm_hash_table_t *shelfs = db->shelfs;
+    value_t result;
+
+    bool found = ioopm_hash_table_lookup(shelfs, PTR_AS_ELEM(place_in_shelfs), &result);
+    item_t *found_item = result.p;
+    if(found && strcmp(item->name, found_item->name)!=0){
+        return false;
+    }
+
+    //upd_shelf->quant > current shelf quant
+    if(new_shelf_bigger_quantity(item,upd_shelf)){
+        return false;
+    }
+
+    //1. add in item_t's list 
+    ioopm_list_t *item_linked_list = item->shelfs;
+    ioopm_list_append(item_linked_list,PTR_AS_ELEM(upd_shelf));
+
+    //2. add in db->shelfs
+    ioopm_hash_table_insert(shelfs,PTR_AS_ELEM(place_in_shelfs),PTR_AS_ELEM(item));
+    return true;
 }
 
 void create_cart(){
