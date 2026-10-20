@@ -85,6 +85,16 @@ void free_item(item_t *item){
     free(item);
 }
 
+void free_shelf(shelf_t *shelf){
+    free(shelf->place);
+    free(shelf);
+}
+
+void free_cart(cart_t *cart){
+    ioopm_hash_table_destroy(cart->items);
+    free(cart);
+}
+
 void database_destroy(database_t *db){
     //frigör item_t's och resp lagerplatser
     
@@ -95,7 +105,7 @@ void database_destroy(database_t *db){
         value_t current = ioopm_hash_table_iterator_current_value(it_carts);
         cart_t *cart = current.p;
     
-        remove_cart(cart);
+        free_cart(cart);
     
         ioopm_hash_table_iterator_advance(it_carts);
     }
@@ -130,10 +140,8 @@ shelf_t *create_shelf(char* place, size_t quantity){
     return shelf;
 }
 
-void free_shelf(shelf_t *shelf){
-    free(shelf->place);
-    free(shelf);
-}
+
+
 
 //helper for remove merch, does not free
 static bool remove_from_items(item_t *item, database_t *db){
@@ -451,11 +459,6 @@ cart_t* create_cart(int id, database_t *db){
     cart->items = ioopm_hash_table_create(ptr_hash,ptr_comp);
     ioopm_hash_table_insert(db->carts,INT_AS_ELEM(id),PTR_AS_ELEM(cart));
     return cart;
-}
-
-void remove_cart(cart_t *cart){
-    ioopm_hash_table_destroy(cart->items);
-    free(cart);
 }
 //notes: checkout handles removing actual quantity from warehouse
 bool add_to_cart(item_t *item, int id, size_t quantity, database_t *db){

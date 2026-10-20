@@ -59,49 +59,41 @@ bool remove_merch(item_t *item, database_t *db);
 /// @return T/F depening on if item_t was successfully edited
 bool edit_merch(item_t *old_item, database_t *db, char* new_name, char* new_desc, int new_price);
 
-/// @brief 
-/// @param place 
-/// @param quantity 
-/// @return 
+/// @brief allocates a new shelf_t
+/// @param place char* the place of shelf_t
+/// @param quantity size_t amount of item_t
+/// @return newly created shelf_t
 shelf_t *create_shelf(char* place, size_t quantity);
-
-/// @brief 
-/// @param shelf 
-void free_shelf(shelf_t *shelf);
 
 /// @brief prints item_t's stock (place and quantity)
 /// @param item item_t with said stock
 void show_stock(item_t *item);
 
-/// @brief 
-/// @param item 
-/// @param upd_shelf 
-/// @param db 
-/// @return 
+/// @brief replenishes the stock of said item at said shelf
+/// @param item the item on the shelf
+/// @param upd_shelf the uppdated shelf (new quantity is ui's task)
+/// @param db the database_t operated upon
+/// @return T/F depening on is shelf was successfully updated
 bool replenish(item_t *item, shelf_t *upd_shelf, database_t *db);
 
-/// @brief 
-/// @param id 
-/// @param db 
-/// @return 
+/// @brief creates and allocates a new cart_t
+/// @param id the id of the new shelf
+/// @param db the database_t cointaining cart_t
+/// @return the created cart_t
 cart_t* create_cart(int id,database_t *db);
 
-/// @brief 
-/// @param cart 
-void remove_cart(cart_t *cart);
-
-/// @brief 
-/// @param item 
-/// @param id 
-/// @param quantity 
-/// @param db 
-/// @return 
+/// @brief adds said item with said quantity to cart_t with said id in database_t 
+/// @param item the item_t added 
+/// @param id int of the id of the cart_t
+/// @param quantity size_t amount we added to cart_t
+/// @param db the database_t operated upon
+/// @return T/F depending if item successfully added to cart_t
 bool add_to_cart(item_t *item, int id, size_t quantity, database_t *db);
 
-/// @brief 
-/// @param item 
-/// @param id 
-/// @param quantity 
-/// @param db 
-/// @return 
+/// @brief removes said item from cart with said id, in database_t
+/// @param item item_t removed from cart_t
+/// @param id int of the id of our cart_t
+/// @param quantity size_t amount removed from cart_t 
+/// @param db database_t operated upon
+/// @return T/F depending if item was successfully removed
 bool remove_from_cart(item_t *item, int id, size_t quantity, database_t *db);
