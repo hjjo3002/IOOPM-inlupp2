@@ -6,8 +6,6 @@
            db->cart => key=id, value=cart_t
 */
 
-
-
 struct item
 {
     char* name;
@@ -89,18 +87,33 @@ void free_item(item_t *item){
 
 void database_destroy(database_t *db){
     //frigör item_t's och resp lagerplatser
+    
+    ioopm_hash_table_t *carts = db->carts;
+    ioopm_hash_table_iterator_t *it_carts = ioopm_hash_table_iterator_create(carts);
+    
+    while(!ioopm_hash_table_iterator_at_end(it_carts)){
+        value_t current = ioopm_hash_table_iterator_current_value(it_carts);
+        cart_t *cart = current.p;
+    
+        remove_cart(cart);
+    
+        ioopm_hash_table_iterator_advance(it_carts);
+    }
+    ioopm_hash_table_iterator_destroy(it_carts);
+    
+        
     ioopm_hash_table_t *items = db->items;
-    ioopm_hash_table_iterator_t *it = ioopm_hash_table_iterator_create(items);
+    ioopm_hash_table_iterator_t *it_items = ioopm_hash_table_iterator_create(items);
 
-    while(!ioopm_hash_table_iterator_at_end(it)){
-        value_t current = ioopm_hash_table_iterator_current_value(it);
+    while(!ioopm_hash_table_iterator_at_end(it_items)){
+        value_t current = ioopm_hash_table_iterator_current_value(it_items);
         item_t *item = current.p;
 
         free_item(item);
 
-        ioopm_hash_table_iterator_advance(it);
+        ioopm_hash_table_iterator_advance(it_items);
     }
-    ioopm_hash_table_iterator_destroy(it);
+    ioopm_hash_table_iterator_destroy(it_items);
 
     ioopm_hash_table_destroy(db->items);
     ioopm_hash_table_destroy(db->shelfs);
@@ -110,6 +123,17 @@ void database_destroy(database_t *db){
     free(db);
 }
 
+shelf_t *create_shelf(char* place, size_t quantity){
+    shelf_t *shelf = calloc(1,sizeof(shelf_t));
+    shelf->place = place;
+    shelf->quantity = quantity;
+    return shelf;
+}
+
+void free_shelf(shelf_t *shelf){
+    free(shelf->place);
+    free(shelf);
+}
 
 //helper for remove merch, does not free
 static bool remove_from_items(item_t *item, database_t *db){
@@ -191,6 +215,7 @@ static size_t linked_list_size(ioopm_list_t *ls){
         ioopm_list_iterator_advance(it);
         count++;
     }
+    ioopm_list_iterator_destroy(it);
     return count;
 }
 //used in linked_list_sorted
@@ -312,7 +337,6 @@ static size_t get_reserved_stock(item_t *item, database_t *db){
 
 //main functions:
 
-
 bool add_merch(item_t *item, database_t *db){
    ioopm_hash_table_t *items=db->items;
    char* name_check = item->name;
@@ -371,15 +395,17 @@ bool edit_merch(item_t *old_item, database_t *db, char* new_name, char* new_desc
 void show_stock(item_t *item){
     ioopm_list_t *shelfs = item->shelfs;
     size_t length = linked_list_size(shelfs);
+    char* name = item->name;
     
     if(length==0){
         printf("Empty stock");
         return;
     }
     shelf_t** arr = linked_list_sorted(shelfs);
+    printf("%s's stock:\n",name);
 
     for(size_t i=0; i<length; i++){
-        printf("%s, %zu st",arr[i]->place, arr[i]->quantity);
+        printf("%s: %zu st\n",arr[i]->place, arr[i]->quantity);
     }
     free(arr);
 }
@@ -419,10 +445,11 @@ bool replenish(item_t *item, shelf_t *upd_shelf, database_t *db)
     return true;
 }
 
-cart_t* create_cart(int id){
+cart_t* create_cart(int id, database_t *db){
     cart_t *cart = calloc(1,sizeof(cart_t));
     cart->id = id;
     cart->items = ioopm_hash_table_create(ptr_hash,ptr_comp);
+    ioopm_hash_table_insert(db->carts,INT_AS_ELEM(id),PTR_AS_ELEM(cart));
     return cart;
 }
 
@@ -430,12 +457,10 @@ void remove_cart(cart_t *cart){
     ioopm_hash_table_destroy(cart->items);
     free(cart);
 }
-
-
 //notes: checkout handles removing actual quantity from warehouse
 bool add_to_cart(item_t *item, int id, size_t quantity, database_t *db){
     //TODO check stock
-    cart_t *cart = find_cart(id,db); //todo findcart
+    cart_t *cart = find_cart(id,db);
     ioopm_hash_table_t* cart_ht = cart->items;
     
     //check if total stock is enought (have to go thru all carts too to check their carts to get available.)
@@ -459,9 +484,37 @@ bool add_to_cart(item_t *item, int id, size_t quantity, database_t *db){
 
 }
 
-void remove_from_cart(){
-    //TODO
+bool remove_from_cart(item_t *item, int id, size_t quantity, database_t *db){
+    //TODO removes said item from a cart, 
+    cart_t *cart = find_cart(id,db);
+    ioopm_hash_table_t *cart_ht = cart->items;
 
+    if(cart == NULL || item == NULL){
+        return false;
+    }
+
+    value_t result;
+
+    //check if item in cart + get quantity from result
+    if(!ioopm_hash_table_lookup(cart_ht,PTR_AS_ELEM(item),&result)){
+        return false;
+    }
+
+    //check valid quantity
+    size_t quantity_in_db = result.s;
+    if(quantity>quantity_in_db){
+        return false;
+    }
+    //if removed quantity == total quantity of item -> remove completely
+    if(quantity==quantity_in_db){
+        //remove completely
+        ioopm_hash_table_remove(cart_ht,PTR_AS_ELEM(item),&result);
+        return true;
+    }
+    size_t new_quantity = quantity_in_db-quantity;
+
+    ioopm_hash_table_insert(cart_ht,PTR_AS_ELEM(item),SIZE_AS_ELEM(new_quantity));
+    return true;
 }
 
 void calculate_cost(){
@@ -475,3 +528,4 @@ void checkout(){
 void quit(){
     //TODO 
 }
+

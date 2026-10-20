@@ -59,6 +59,16 @@ bool remove_merch(item_t *item, database_t *db);
 /// @return T/F depening on if item_t was successfully edited
 bool edit_merch(item_t *old_item, database_t *db, char* new_name, char* new_desc, int new_price);
 
+/// @brief 
+/// @param place 
+/// @param quantity 
+/// @return 
+shelf_t *create_shelf(char* place, size_t quantity);
+
+/// @brief 
+/// @param shelf 
+void free_shelf(shelf_t *shelf);
+
 /// @brief prints item_t's stock (place and quantity)
 /// @param item item_t with said stock
 void show_stock(item_t *item);
@@ -72,9 +82,26 @@ bool replenish(item_t *item, shelf_t *upd_shelf, database_t *db);
 
 /// @brief 
 /// @param id 
+/// @param db 
 /// @return 
-cart_t* create_cart(int id);
+cart_t* create_cart(int id,database_t *db);
 
 /// @brief 
 /// @param cart 
 void remove_cart(cart_t *cart);
+
+/// @brief 
+/// @param item 
+/// @param id 
+/// @param quantity 
+/// @param db 
+/// @return 
+bool add_to_cart(item_t *item, int id, size_t quantity, database_t *db);
+
+/// @brief 
+/// @param item 
+/// @param id 
+/// @param quantity 
+/// @param db 
+/// @return 
+bool remove_from_cart(item_t *item, int id, size_t quantity, database_t *db);
