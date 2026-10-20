@@ -165,7 +165,15 @@ void test_edit_merch(){
   database_destroy(db);
 }
 
+void mem_test_cart(){
+  int id =1;
+  database_t *db = create_database();
 
+  cart_t *cart1 = create_cart(id);
+  remove_cart(cart1);
+
+  database_destroy(db);
+}
 
 
 
@@ -202,6 +210,8 @@ int main() {
     (CU_add_test(my_test_suite, "edit merch", test_edit_merch) == NULL) ||
     (CU_add_test(my_test_suite, "add duplicate", test_add_duplicate) == NULL) || 
     (CU_add_test(my_test_suite, "remove_false", test_remove_false) == NULL) || 
+    (CU_add_test(my_test_suite, "memtest for cart", mem_test_cart) == NULL) || 
+
 
 
     

@@ -69,3 +69,12 @@ void show_stock(item_t *item);
 /// @param db 
 /// @return 
 bool replenish(item_t *item, shelf_t *upd_shelf, database_t *db);
+
+/// @brief 
+/// @param id 
+/// @return 
+cart_t* create_cart(int id);
+
+/// @brief 
+/// @param cart 
+void remove_cart(cart_t *cart);

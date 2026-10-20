@@ -115,6 +115,26 @@ bool str_comp(const value_t a, const value_t b)
   return strcmp((char*)a.p, (char*)b.p) == 0;
 }
 
+
+size_t int_hash(const value_t key)
+{
+  size_t value = key.i;
+  return value % No_buckets;
+}
+
+bool int_comp(const value_t a, const value_t b)
+{
+  return(a.i==b.i);
+}
+
+size_t ptr_hash(const value_t key){
+  return((uintptr_t) key.p % No_buckets);
+}
+
+bool ptr_comp(const value_t a, const value_t b){
+  return(a.p == b.p);
+}
+
 static entry_t *find_previous_entry(ioopm_hash_table_t *ht, const value_t key)
 {
   size_t bucket = ht->hash_fn(key) % No_buckets;

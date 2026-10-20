@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <stdint.h>
 
 /**
 * @file datastruct.h
@@ -19,6 +20,7 @@
 #define BOOL_AS_ELEM(v)  ((value_t) { .b = (v) })
 #define FLOAT_AS_ELEM(v) ((value_t) { .f = (v) })
 #define PTR_AS_ELEM(v)   ((value_t) { .p = (v) })
+#define SIZE_AS_ELEM(v)   ((value_t) { .s = (v) })
 
 typedef union value value_t;
 union value
@@ -27,6 +29,7 @@ union value
     bool b;
     float f;
     void *p;
+    size_t s;
 };
 
 
@@ -40,10 +43,31 @@ typedef size_t ioopm_hash_function(const value_t key);
 /// @return hashed unsinged interger
 size_t str_hash(const value_t key);
 
+/// @brief hashes a key as int
+/// @param key int to be hashed
+/// @return hashed value
+size_t int_hash(const value_t key);
+
+/// @brief hashes a key as ptr
+/// @param key ptr to hashes
+/// @return hashed value
+size_t ptr_hash(const value_t key);
 
 /// @brief compares keys as strings
 /// @return true if the keys match as strings
 bool str_comp(const value_t a, const value_t b);
+
+/// @brief compares keys as ints
+/// @param a int a
+/// @param b int b
+/// @return true if a is equal to b
+bool int_comp(const value_t a, const value_t b);
+
+/// @brief compares keys as ptrs
+/// @param a ptr a
+/// @param b ptr b
+/// @return true if is equal
+bool ptr_comp(const value_t a, const value_t b);
 
 //NOTE: Might have be better add create function for each of the diffrent types of key instead of 
 // adding public hash and compare functions
