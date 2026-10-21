@@ -13,7 +13,7 @@ typedef struct database database_t;
 /// @param name item_t's name
 /// @param desc item_t's description
 /// @param price item_t's price
-/// @return the newly created item_t
+/// @return pointer to item_t
 item_t *create_item(char* name, char* desc, size_t price);
 
 /// @brief a check if an item_t is in database db
@@ -40,7 +40,7 @@ void database_destroy(database_t *db);
 /// @return T/F depending if item_t successfully was added to db
 bool add_merch(item_t *item, database_t *db);
 
-/// @brief creates an sorted array with all item_t's in db and prints said array
+/// @brief Prints all items in the database in alphabetical order.
 /// @param db the database_t containing all item_t's
 void list_merch(database_t *db);
 
@@ -62,14 +62,14 @@ bool edit_merch(item_t *old_item, database_t *db, char* new_name, char* new_desc
 /// @brief allocates a new shelf_t
 /// @param place char* the place of shelf_t
 /// @param quantity size_t amount of item_t
-/// @return newly created shelf_t
+/// @return pointer to shelf_t
 shelf_t *create_shelf(char* place, size_t quantity);
 
 /// @brief prints item_t's stock (place and quantity)
 /// @param item item_t with said stock
 void show_stock(item_t *item);
 
-/// @brief replenishes the stock of said item at said shelf
+/// @brief Adds or updates stock for an item at a specified shelf.
 /// @param item the item on the shelf
 /// @param upd_shelf the uppdated shelf (new quantity is ui's task)
 /// @param db the database_t operated upon
@@ -88,6 +88,7 @@ cart_t* create_cart(int id,database_t *db);
 /// @param quantity size_t amount we added to cart_t
 /// @param db the database_t operated upon
 /// @return T/F depending if item successfully added to cart_t
+/// @note Reserves stock without modifying the real shelf quantity.
 bool add_to_cart(item_t *item, int id, size_t quantity, database_t *db);
 
 /// @brief removes said item from cart with said id, in database_t
@@ -96,6 +97,8 @@ bool add_to_cart(item_t *item, int id, size_t quantity, database_t *db);
 /// @param quantity size_t amount removed from cart_t 
 /// @param db database_t operated upon
 /// @return T/F depending if item was successfully removed
+/// @note Items reserved in shopping carts cannot be removed.
+///       Successfully removed items and their shelves are freed.
 bool remove_from_cart(item_t *item, int id, size_t quantity, database_t *db);
 
 /// @brief calculates the price of current cart 
@@ -108,4 +111,6 @@ size_t calculate_cost(int id, database_t *db);
 /// @param id int of cart_t id
 /// @param db database_t operated upon
 /// @return T/F depending if cart was successfully checked out
+/// @note Deducts purchased quantities from shelves and
+///       removes and frees the cart after successful checkout.
 bool checkout(int id, database_t *db);
