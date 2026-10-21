@@ -97,3 +97,15 @@ bool add_to_cart(item_t *item, int id, size_t quantity, database_t *db);
 /// @param db database_t operated upon
 /// @return T/F depending if item was successfully removed
 bool remove_from_cart(item_t *item, int id, size_t quantity, database_t *db);
+
+/// @brief calculates the price of current cart 
+/// @param id int of the cart in question
+/// @param db database_t operated upon
+/// @return size_t of the total price
+size_t calculate_cost(int id, database_t *db);
+
+/// @brief checkouts a cart with said id, removes carts stock from db
+/// @param id int of cart_t id
+/// @param db database_t operated upon
+/// @return T/F depending if cart was successfully checked out
+bool checkout(int id, database_t *db);

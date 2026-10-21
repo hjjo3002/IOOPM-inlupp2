@@ -34,6 +34,8 @@ struct database
     ioopm_hash_table_t *carts;
 };
 
+
+
 item_t *create_item(char* name, char* desc, size_t price){
     item_t *item = calloc(1,sizeof(item_t));
     ioopm_list_t *shelfs_for_item = ioopm_list_create(); //use this for gdb segfault 
@@ -142,7 +144,6 @@ shelf_t *create_shelf(char* place, size_t quantity){
 
 
 
-
 //helper for remove merch, does not free
 static bool remove_from_items(item_t *item, database_t *db){
     value_t result;
@@ -191,7 +192,7 @@ static char** hashkey_to_array(ioopm_hash_table_t *ht){
     ioopm_hash_table_iterator_destroy(it);
     return arr;
 }
-
+//helper for edit merch
 static item_t *edit_item(item_t *item, char* new_name, char* new_desc, int new_price){
     item->name = new_name;
     item->desc = new_desc;
@@ -199,7 +200,7 @@ static item_t *edit_item(item_t *item, char* new_name, char* new_desc, int new_p
 
     return item;
 }
-
+//helper for edit merch
 static void edit_ht_items(item_t *item, database_t *db, char* new_name, char* new_desc, int new_price){
     value_t result; 
     ioopm_hash_table_t *items = db->items;
@@ -215,7 +216,7 @@ static void edit_ht_items(item_t *item, database_t *db, char* new_name, char* ne
     
     ioopm_hash_table_insert(items,PTR_AS_ELEM(item->name),PTR_AS_ELEM(item)); 
 }
-
+//helper for show stock
 static size_t linked_list_size(ioopm_list_t *ls){
     ioopm_list_iterator_t *it = ioopm_list_iterator_create(ls);
     size_t count = 0;
@@ -284,7 +285,7 @@ static shelf_t *find_shelf(item_t *item, char *place)
     ioopm_list_iterator_destroy(it);
     return found;
 }
-
+//helper for add to cart
 static size_t get_total_stock_of_db(item_t *item){
     //iterate thru item->shelfs and add up quantity
     size_t total_quantity = 0;
@@ -306,8 +307,8 @@ static size_t get_total_stock_of_db(item_t *item){
     ioopm_list_iterator_destroy(it);
     return total_quantity;
 }
-
-cart_t *find_cart(int id, database_t *db){
+//helper for add to cart, remove, calculate cost and checkout(finds cart with said id)
+static cart_t *find_cart(int id, database_t *db){
     ioopm_hash_table_t *cart_ht = db->carts;
     value_t result;
     if(ioopm_hash_table_lookup(cart_ht,INT_AS_ELEM(id),&result)){
@@ -315,7 +316,7 @@ cart_t *find_cart(int id, database_t *db){
     }
     return NULL;
 }
-
+//helper for add to cart
 static size_t get_reserved_stock(item_t *item, database_t *db){
     size_t reserved_stock = 0;
     ioopm_hash_table_t *carts = db->carts;
@@ -339,9 +340,43 @@ static size_t get_reserved_stock(item_t *item, database_t *db){
 
     return reserved_stock;
 }
+//helper for checkout
+static bool remove_quantity_from_shelfs(item_t *item, size_t quantity, database_t *db){
+    //go in to item linked list, look at fist elem, 
+    ioopm_list_t *item_list = item->shelfs;
+    ioopm_list_iterator_t *it = ioopm_list_iterator_create(item_list);
+    size_t stock_left = quantity; 
 
+    while (stock_left != 0)
+    {
+        if(ioopm_list_iterator_at_end(it)){
+            ioopm_list_iterator_destroy(it);
+            return false; //should not be reachable due to add_to_cart implementaton
+        }
 
+        value_t current_item = ioopm_list_iterator_current(it);
+        shelf_t *current_shelf = current_item.p;
+        size_t shelf_quantity = current_shelf->quantity;
+        value_t result;
+        
+        if(shelf_quantity>stock_left){
+            //decrease the stock in linked list. (db->shelfs we dont have to touch)
+            current_shelf->quantity =current_shelf->quantity - stock_left;
+            stock_left=0;
+        }
 
+        else { //shelf_quantity=<quantity
+            //remove first instanse of item_t, remove from both, upd stock_left
+            ioopm_hash_table_remove(db->shelfs,PTR_AS_ELEM(current_shelf->place),&result);
+            ioopm_list_iterator_remove(it);
+            stock_left=stock_left-shelf_quantity;
+            //free????????
+            free_shelf(current_shelf);
+        }
+    }
+    ioopm_list_iterator_destroy(it);
+    return true;
+}
 
 //main functions:
 
@@ -373,6 +408,10 @@ void list_merch(database_t *db){
 }
 
 bool remove_merch(item_t *item, database_t *db){
+    if(get_reserved_stock(item,db)>0){
+        return false;
+    }
+
     if(remove_from_items(item,db)){
 
         if(remove_from_shelfs(item,db)){
@@ -520,15 +559,67 @@ bool remove_from_cart(item_t *item, int id, size_t quantity, database_t *db){
     return true;
 }
 
-void calculate_cost(){
-    //TODO
+size_t calculate_cost(int id, database_t *db){
+    //TODO calculate the cost of the whole cart. 
+    size_t total_price = 0;
+    cart_t *cart = find_cart(id,db);
+
+    if(cart==NULL){
+        return 0;
+    }
+    //iterate thru whole cart, key = ptr to item_t price=item_t->price * quantity (the vaule of ht)
+    ioopm_hash_table_iterator_t *it = ioopm_hash_table_iterator_create(cart->items);
+
+    while(!ioopm_hash_table_iterator_at_end(it)){
+        value_t current_value = ioopm_hash_table_iterator_current_key(it);
+
+        item_t *current_item = current_value.p;
+        size_t price = current_item->price;
+
+        value_t quantity_in_value_t = ioopm_hash_table_iterator_current_value(it);
+        size_t quantity_of_item = quantity_in_value_t.s;
+
+        size_t current_price = price*quantity_of_item;
+
+        total_price=total_price+current_price;
+
+        ioopm_hash_table_iterator_advance(it);
+    }
+    ioopm_hash_table_iterator_destroy(it);
+
+    return total_price;
 }
 
-void checkout(){
-    //TODO
-}
+bool checkout(int id, database_t *db){
+    //make sure to remove same from db->shelf
+    cart_t *cart = find_cart(id,db);
 
-void quit(){
-    //TODO 
+    if(cart==NULL){
+        return false;
+    }
+
+    ioopm_hash_table_t *carts_ht = cart->items;
+
+    ioopm_hash_table_iterator_t *it = ioopm_hash_table_iterator_create(carts_ht);
+
+    while(!ioopm_hash_table_iterator_at_end(it)){
+        value_t current_value = ioopm_hash_table_iterator_current_key(it);
+        item_t *current_item = current_value.p;
+
+        value_t quantity_in_value_t = ioopm_hash_table_iterator_current_value(it);
+        size_t quantity_of_item = quantity_in_value_t.s;
+
+        //now we got item_t & quantity, remove from shelfs
+        if(!remove_quantity_from_shelfs(current_item,quantity_of_item,db)){
+            ioopm_hash_table_iterator_destroy(it);
+            return false;
+        }
+
+        ioopm_hash_table_iterator_advance(it);
+        }
+    // destroy and clean the cart
+    ioopm_hash_table_iterator_destroy(it);
+    free_cart(cart);
+    return true;
 }
 
