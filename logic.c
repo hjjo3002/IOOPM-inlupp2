@@ -144,17 +144,35 @@ shelf_t *create_shelf(char* place, size_t quantity){
 
 
 
+
 //helper for remove merch, does not free
 static bool remove_from_items(item_t *item, database_t *db){
     value_t result;
     ioopm_hash_table_t *items = db->items;   
     return ioopm_hash_table_remove(items,PTR_AS_ELEM(item->name),&result);
 }
+//used in remove from shelfs
+static void free_items_shelf(item_t *item){
+    ioopm_list_t *list = item->shelfs;
+
+    while(!ioopm_list_is_empty(list))
+    {
+        value_t current_value = ioopm_list_remove(list,0);
+        shelf_t *shelf = current_value.p;
+        free_shelf(shelf);
+    }
+}
 //helper for remove merch, frees from list shelfs. 
 static bool remove_from_shelfs(item_t *item, database_t *db){
     ioopm_list_t *place_in_shelf=item->shelfs; //linked list for all places of item 
     ioopm_list_iterator_t *it = ioopm_list_iterator_create(place_in_shelf);
+
     bool success = true;
+
+    if(ioopm_list_is_empty(place_in_shelf)){ //if no shelfs? 
+        ioopm_list_iterator_destroy(it);
+        return true;
+    }
 
     while(!ioopm_list_iterator_at_end(it)){
         value_t result;
@@ -165,12 +183,11 @@ static bool remove_from_shelfs(item_t *item, database_t *db){
             success = false;
         }
 
-        free(shelf->place); 
-        free(shelf);
-        ioopm_list_iterator_advance(it);
-        ioopm_list_destroy(place_in_shelf);
+        ioopm_list_iterator_advance(it); 
     }
+    
     ioopm_list_iterator_destroy(it);
+    free_items_shelf(item);
     return success;
 } 
 //helper for list merch
@@ -410,7 +427,7 @@ void list_merch(database_t *db){
 }
 
 bool remove_merch(item_t *item, database_t *db){
-    if(get_reserved_stock(item,db)>0){
+    if(get_reserved_stock(item,db)>0){ //check for no carts have item in cart
         return false;
     }
 
@@ -424,7 +441,7 @@ bool remove_merch(item_t *item, database_t *db){
         else{return false;}
     }
     else{return false;}
-    //TODO free mem
+    //TODO if shelfs exists remove them
 }
 
 bool edit_merch(item_t *old_item, database_t *db, char* new_name, char* new_desc, int new_price){
@@ -432,6 +449,8 @@ bool edit_merch(item_t *old_item, database_t *db, char* new_name, char* new_desc
     ioopm_hash_table_t *items = db->items;
 
     if(ioopm_hash_table_has_key(items,PTR_AS_ELEM(new_name))){
+        free(new_name);
+        free(new_desc);
         return false;
     }
     else{
@@ -459,8 +478,8 @@ void show_stock(item_t *item){
     free(arr);
 }
 
-bool replenish(item_t *item, shelf_t *upd_shelf, database_t *db)
-{
+bool replenish(item_t *item, shelf_t *upd_shelf, database_t *db){
+     //free old_shelf?? 
     char *place = upd_shelf->place;
     value_t result;
 
@@ -474,6 +493,7 @@ bool replenish(item_t *item, shelf_t *upd_shelf, database_t *db)
         item_t *found_item = result.p;
 
         if (found_item != item){
+            free_shelf(upd_shelf);
             return false;
         }
         shelf_t *existing = find_shelf(item, place);
@@ -483,6 +503,7 @@ bool replenish(item_t *item, shelf_t *upd_shelf, database_t *db)
         }
 
         existing->quantity = upd_shelf->quantity;
+        free_shelf(upd_shelf);
         return true;
     }
 
@@ -625,4 +646,3 @@ bool checkout(int id, database_t *db){
     return true;
 }
 
-//test
