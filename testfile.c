@@ -483,10 +483,172 @@ void test_add_remove_add_cart(){
   database_destroy(db);
 }
 
+void test_calculate_cost_single_item(){
+  database_t *db = create_database();
+  char* name1 = "tröja";
+  char* desc1 = "str L";
+  int price1 = 200;
+  
+  item_t *item1 = create_item(strdup(name1),strdup(desc1),price1);
+  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_TRUE(item_exists(name1,db));
 
+  char* place1 = "A10";
+  size_t quantity1 = 10;
+  shelf_t *new_shelf1 = create_shelf(strdup(place1),quantity1);
 
+  // char* place2 = "A11";
+  // size_t quantity2 = 8;
+  // shelf_t *new_shelf2 = create_shelf(strdup(place2),quantity2);
 
+  // char* place3 = "A12";
+  // size_t quantity3 = 1;
+  // shelf_t *new_shelf3 = create_shelf(strdup(place3),quantity3);
 
+  CU_ASSERT_TRUE(replenish(item1,new_shelf1,db));
+  // CU_ASSERT_TRUE(replenish(item1,new_shelf2,db));
+  // CU_ASSERT_TRUE(replenish(item1,new_shelf3,db));
+
+  int id1 = 1;
+  create_cart(id1,db);
+  
+  CU_ASSERT_TRUE(add_to_cart(item1,id1,10,db));
+  CU_ASSERT_EQUAL(calculate_cost(id1,db),2000);
+
+  database_destroy(db);
+}
+
+void test_multiple_shelfs_single_item(){
+  database_t *db = create_database();
+  char* name1 = "tröja";
+  char* desc1 = "str L";
+  int price1 = 200;
+  
+  item_t *item1 = create_item(strdup(name1),strdup(desc1),price1);
+  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_TRUE(item_exists(name1,db));
+
+  char* place1 = "A10";
+  size_t quantity1 = 10;
+  shelf_t *new_shelf1 = create_shelf(strdup(place1),quantity1);
+
+  char* place2 = "A11";
+  size_t quantity2 = 8;
+  shelf_t *new_shelf2 = create_shelf(strdup(place2),quantity2);
+
+  char* place3 = "A12";
+  size_t quantity3 = 12;
+  shelf_t *new_shelf3 = create_shelf(strdup(place3),quantity3);
+
+  CU_ASSERT_TRUE(replenish(item1,new_shelf1,db));
+  CU_ASSERT_TRUE(replenish(item1,new_shelf2,db));
+  CU_ASSERT_TRUE(replenish(item1,new_shelf3,db));
+
+  int id1 = 1;
+  create_cart(id1,db);
+  
+  CU_ASSERT_TRUE(add_to_cart(item1,id1,20,db));
+  CU_ASSERT_EQUAL(calculate_cost(id1,db),4000);
+
+  database_destroy(db);
+}
+
+void test_multiple_items_shelfs(){
+  database_t *db = create_database();
+  char* name1 = "tröja";
+  char* desc1 = "str L";
+  int price1 = 200;
+  
+  item_t *item1 = create_item(strdup(name1),strdup(desc1),price1);
+  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_TRUE(item_exists(name1,db));
+
+  char* place1 = "A10";
+  size_t quantity1 = 10;
+  shelf_t *new_shelf1 = create_shelf(strdup(place1),quantity1);
+
+  char* place2 = "A11";
+  size_t quantity2 = 8;
+  shelf_t *new_shelf2 = create_shelf(strdup(place2),quantity2);
+
+  char* place3 = "A12";
+  size_t quantity3 = 12;
+  shelf_t *new_shelf3 = create_shelf(strdup(place3),quantity3);
+
+  CU_ASSERT_TRUE(replenish(item1,new_shelf1,db));
+  CU_ASSERT_TRUE(replenish(item1,new_shelf2,db));
+  CU_ASSERT_TRUE(replenish(item1,new_shelf3,db));
+
+  char* name2 = "skor";
+  char* desc2 = "str 42";
+  int price2 = 100;
+  
+  item_t *item2 = create_item(strdup(name2),strdup(desc2),price2);
+  CU_ASSERT_TRUE(add_merch(item2,db));
+  CU_ASSERT_TRUE(item_exists(name2,db));
+
+  char* place4 = "A13";
+  size_t quantity4 = 10;
+  shelf_t *new_shelf4 = create_shelf(strdup(place4),quantity4);
+
+  char* place5 = "A14";
+  size_t quantity5 = 8;
+  shelf_t *new_shelf5 = create_shelf(strdup(place5),quantity5);
+
+  char* place6 = "A15";
+  size_t quantity6 = 12;
+  shelf_t *new_shelf6 = create_shelf(strdup(place6),quantity6);
+
+  CU_ASSERT_TRUE(replenish(item2,new_shelf4,db));
+  CU_ASSERT_TRUE(replenish(item2,new_shelf5,db));
+  CU_ASSERT_TRUE(replenish(item2,new_shelf6,db));
+
+  int id1 = 1;
+  create_cart(id1,db);
+
+  CU_ASSERT_TRUE(add_to_cart(item1,id1,20,db));
+  CU_ASSERT_TRUE(add_to_cart(item2,id1,20,db));
+
+  CU_ASSERT_EQUAL(calculate_cost(id1,db),6000);
+
+  database_destroy(db);
+}
+
+void test_checkout_complete(){
+  database_t *db = create_database();
+  char* name1 = "tröja";
+  char* desc1 = "str L";
+  int price1 = 200;
+  
+  item_t *item1 = create_item(strdup(name1),strdup(desc1),price1);
+  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_TRUE(item_exists(name1,db));
+
+  char* place1 = "A10";
+  size_t quantity1 = 10;
+  shelf_t *new_shelf1 = create_shelf(strdup(place1),quantity1);
+
+  char* place2 = "A11";
+  size_t quantity2 = 8;
+  shelf_t *new_shelf2 = create_shelf(strdup(place2),quantity2);
+
+  char* place3 = "A12";
+  size_t quantity3 = 12;
+  shelf_t *new_shelf3 = create_shelf(strdup(place3),quantity3);
+
+  CU_ASSERT_TRUE(replenish(item1,new_shelf1,db));
+  CU_ASSERT_TRUE(replenish(item1,new_shelf2,db));
+  CU_ASSERT_TRUE(replenish(item1,new_shelf3,db));
+
+  int id1 = 1;
+  create_cart(id1,db);
+  
+  CU_ASSERT_TRUE(add_to_cart(item1,id1,20,db));
+  CU_ASSERT_EQUAL(calculate_cost(id1,db),4000);
+  CU_ASSERT_TRUE(checkout(id1,db));
+  
+  database_destroy(db);
+}
 
 
 
@@ -531,6 +693,14 @@ int main() {
     (CU_add_test(my_test_suite, "add + remove from cart", test_cart_add_remove) == NULL) || 
     (CU_add_test(my_test_suite, "add + remove from cart false", test_cart_add_remove_to_much) == NULL) || 
     (CU_add_test(my_test_suite, "add + remove + add, egde", test_add_remove_add_cart) == NULL) || 
+    (CU_add_test(my_test_suite, "calculate cost single item", test_calculate_cost_single_item) == NULL) || 
+    (CU_add_test(my_test_suite, "calculate cost multiple shelfs single item", test_multiple_shelfs_single_item) == NULL) || 
+    (CU_add_test(my_test_suite, "calculate cost multiple shelfs multiple item", test_multiple_items_shelfs) == NULL) || 
+    (CU_add_test(my_test_suite, "checkout complete", test_checkout_complete) == NULL) || 
+
+
+
+
 
 
 

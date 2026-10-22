@@ -30,6 +30,10 @@ database_t *create_database();
 /// @param item the item_t operated upon
 void free_item(item_t *item);
 
+/// @brief 
+/// @param shelf 
+void free_shelf(shelf_t *shelf);
+
 /// @brief frees the database_t and its item_t's and hash_table_t's
 /// @param db the database_t operated upon
 void database_destroy(database_t *db);
