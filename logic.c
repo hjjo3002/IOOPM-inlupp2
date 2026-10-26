@@ -431,7 +431,7 @@ void show_stock(item_t *item){
     char* name = item->name;
     
     if(length==0){
-        printf("Empty stock");
+        printf("Empty stock\n");
         return;
     }
     shelf_t** arr = linked_list_sorted(shelfs);

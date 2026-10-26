@@ -127,7 +127,7 @@ item_t *ask_question_rem_merch(database_t *db){
     }
 }
 
-bool ask_question_edit_merch(database_t *db){
+int ask_question_edit_merch(database_t *db){
     char *old_name = ask_name("name of old merch: ");
     item_t *item = find_item(old_name, db);
     free(old_name);
@@ -140,17 +140,17 @@ bool ask_question_edit_merch(database_t *db){
     char *desc = ask_desc("new description of merch: ");
     int price = ask_price("new price of merch: ");
 
-    bool success = edit_merch(item, db, name, desc, price);
+    int res = edit_merch(item, db, name, desc, price);
 
-    if(!success){
+    if(res!=0){
         free(name);
         free(desc);
     }
 
-    return success;
+    return res;
 }
 
-bool ask_question_replenish(database_t *db){
+int ask_question_replenish(database_t *db){
     char *place = ask_shelf_place();
     char *name = ask_name("name of merch: ");
     size_t quantity = ask_quantity("quantity of shelf: ");
@@ -158,18 +158,23 @@ bool ask_question_replenish(database_t *db){
     shelf_t *new_shelf = create_shelf(place, quantity);
     item_t *item = find_item(name, db);
 
+    if(item == NULL){
+        printf("item does not exist\n");
+        free_shelf(new_shelf);
+        return -4;
+    }
     free(name);
 
-    bool success = replenish(item, new_shelf, db);
+    int res = replenish(item, new_shelf, db);
 
-    if(!success){
+    if(res!=0){
         free_shelf(new_shelf);
     }
 
-    return success;
+    return res;
 }
 
-bool ask_question_add_to_cart(database_t *db){
+int ask_question_add_to_cart(database_t *db){
     int id = ask_question_id();
     char *name = ask_name("name of merch: ");
     size_t quantity = ask_quantity("quantity of item: ");
@@ -182,7 +187,7 @@ bool ask_question_add_to_cart(database_t *db){
 
 size_t calc_cost_question(database_t *db){
     int id = ask_question_id();
-
+    
     return calculate_cost(id, db);
 }
 
@@ -192,28 +197,119 @@ void ask_question_stock(database_t *db){
     show_stock(item);
 }
 
+int ask_question_remove_from_cart(database_t *db){
+    int id = ask_question_id();
+    char *name = ask_name("name of merch: ");
+    size_t quantity = ask_quantity("quantity of item: ");
+
+    item_t *item = find_item(name, db);
+    free(name);
+
+    return remove_from_cart(item, id, quantity, db);
+}
+
+
+void add_item_loop(database_t *db){
+    int res;
+
+    do{
+        item_t *item = ask_question_merch();
+        res = add_merch(item,db);
+        if(res==-1){printf("item already exists\n");}
+
+    }while(res!=0);
+}
+
+void remove_item_loop(database_t *db){
+    yes_or_no();
+    int res;
+
+    do{
+        item_t *item = ask_question_rem_merch(db);
+        res = remove_merch(item,db);
+
+        if(res==-1){printf("failed, item is reserved in cart\n");}
+        if(res==-2){printf("Remove from shelfs failed\n");}
+        if(res==-3){printf("Remove from items failed\n");}
+
+
+    }while(res!=0);
+}
+
+void edit_merch_loop(database_t *db){
+    yes_or_no();
+    int res;
+    do{
+        res = ask_question_edit_merch(db);
+        if(res==-1){printf("failed, new item already exists\n");}
+    }while(res!=0);
+}
+
+void replenish_loop(database_t *db){
+    int res;
+    do{
+        res = ask_question_replenish(db);
+
+        if(res==-1){printf("failed, quantity cannot be 0\n");}
+        if(res==-2){printf("wrong merch at shelf\n");}
+        if(res==-3){printf("shelf not found or quantity too smal\n");}
+
+    }while(res!=0);
+}
+
+void add_to_cart_loop(database_t *db){
+    int res;
+    do{
+        res = ask_question_add_to_cart(db);
+        if(res==-1){printf("failed, quantity bigger than available stock\n");}
+        
+    }while(res!=0);
+}
+
+void remove_from_cart_loop(database_t *db){
+    int res;
+    do{
+        res = ask_question_remove_from_cart(db);
+        if(res==-1){printf("failed, cart not found\n");}
+        if(res==-2){printf("failed, item not in cart\n");}
+        if(res==-3){printf("failed, unvalid quantity\n");}
+    }while(res!=0);
+}
+
+void checkout_loop(database_t *db){
+    int res;
+
+    do{
+        int id = ask_question_id();
+        res = checkout(id,db);
+
+        if(res==-1){printf("failed, cart not found\n");}
+        if(res==-2){printf("remove from shelfs failed\n");}
+
+    }while(res!=0);
+}
+
+
+
+
 void choose_action(char answer,database_t *db){
     if(answer=='A'){
-        item_t *item = ask_question_merch();
-        add_merch(item,db);
+        add_item_loop(db);
     }
     if(answer=='L'){
         list_merch(db);
     }
     if(answer=='D'){
-        yes_or_no();
-        item_t *item = ask_question_rem_merch(db);
-        remove_merch(item,db);
+        remove_item_loop(db); 
     }
     if(answer=='E'){
-        yes_or_no();
-        ask_question_edit_merch(db);
+        edit_merch_loop(db);
     }
     if(answer=='S'){
         ask_question_stock(db);
     }
     if(answer=='P'){
-        ask_question_replenish(db);
+        replenish_loop(db);
     }
     if(answer=='C'){
         int id =ask_question_id();
@@ -225,15 +321,17 @@ void choose_action(char answer,database_t *db){
         remove_cart(id,db);
     }
     if(answer=='+'){
-        ask_question_add_to_cart(db);
+        add_to_cart_loop(db);
+    }
+    if(answer=='-'){
+        remove_from_cart_loop(db);
     }
     if(answer=='='){
         size_t price = calc_cost_question(db);
         printf("the price of cart is %zu kr\n",price);
     }
     if(answer=='O'){
-        int id = ask_question_id();
-        checkout(id,db);
+        checkout_loop(db);
     }
     if(answer=='Q'){
         yes_or_no();
