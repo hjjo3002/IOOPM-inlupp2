@@ -1,6 +1,7 @@
 #include "utils.h"
 
 
+
 int read_string(char *buf, int buf_siz)
 {
     int i = 0;
@@ -90,4 +91,3 @@ answer_t ask_question(char *question, check_func *check,convert_func *con){
 int compare_str_alphabetical(const void *a, const void *b){
     return strcmp(*(const char**)a, *(const char**)b);
 }
-

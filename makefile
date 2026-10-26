@@ -9,8 +9,17 @@ COVERAGE = gcovr -r .
 
 
 
+
+
+main: main.o logic.o datastruct.o ui.o utils.o 
+	$(CC) $(CFLAGS) $^ -o $@
+
+run: main 
+	./main
+	
+
 logic: datastruct.c logic.c 
-	$(CC) $(CFLAGS) -c logic.c 
+	$(CC) $(CFLAGS) -c logic.c
 
 ui: datastruct.c ui.c
 	$(CC) $(CFLAGS) -c ui.c 

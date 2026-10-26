@@ -18,7 +18,6 @@ int clean_suite(void) {
 
 
 
-
 void test_create_and_add_item(){
   database_t *db = create_database();
   char* name = "tröja";
@@ -26,7 +25,7 @@ void test_create_and_add_item(){
   int price = 200;
   
   item_t *item1 = create_item(strdup(name),strdup(desc),price);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name,db));
   database_destroy(db);
 
@@ -48,7 +47,7 @@ void test_add_multiple(){
   int price1 = 200;
   
   item_t *item1 = create_item(strdup(name1),strdup(desc1),price1);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name1,db));
 
   char* name2 = "tshirt";
@@ -56,7 +55,7 @@ void test_add_multiple(){
   int price2 = 100;
   
   item_t *item2 = create_item(strdup(name2),strdup(desc2),price2);
-  CU_ASSERT_TRUE(add_merch(item2,db));
+  CU_ASSERT_EQUAL(add_merch(item2,db), 0);
   CU_ASSERT_TRUE(item_exists(name2,db));
 
   
@@ -65,7 +64,7 @@ void test_add_multiple(){
   int price3 = 300;
   
   item_t *item3 = create_item(strdup(name3),strdup(desc3),price3);
-  CU_ASSERT_TRUE(add_merch(item3,db));
+  CU_ASSERT_EQUAL(add_merch(item3,db), 0);
   CU_ASSERT_TRUE(item_exists(name3,db));
 
   database_destroy(db);
@@ -78,7 +77,7 @@ void test_add_duplicate(){
   int price1 = 200;
   
   item_t *item1 = create_item(strdup(name1),strdup(desc1),price1);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name1,db));
 
   char* name2 = "tröja";
@@ -87,7 +86,7 @@ void test_add_duplicate(){
   
   item_t *item2 = create_item(strdup(name2),strdup(desc2),price2);
 
-  CU_ASSERT_FALSE(add_merch(item2,db));
+  CU_ASSERT_EQUAL(add_merch(item2,db), -1);
 
   database_destroy(db); 
 }
@@ -104,10 +103,10 @@ void test_add_and_remove(){
   int price = 200;
   
   item_t *item1 = create_item(strdup(name),strdup(desc),price);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name,db));
 
-  CU_ASSERT_TRUE(remove_merch(item1,db));
+  CU_ASSERT_EQUAL(remove_merch(item1,db), 0);
   CU_ASSERT_FALSE(item_exists(name,db));
   
   database_destroy(db);
@@ -120,7 +119,7 @@ void test_remove_false(){
   int price = 200;
   
   item_t *item1 = create_item(strdup(name),strdup(desc),price);
-  CU_ASSERT_FALSE(remove_merch(item1,db));
+  CU_ASSERT_EQUAL(remove_merch(item1,db), -3);
 
    free_item(item1);
    database_destroy(db);
@@ -133,7 +132,7 @@ void test_remove_with_shelfs(){
   int price = 200;
   
   item_t *item1 = create_item(strdup(name),strdup(desc),price);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name,db));
 
   char* place1 = "A10";
@@ -148,11 +147,11 @@ void test_remove_with_shelfs(){
   size_t quantity3 = 1;
   shelf_t *new_shelf3 = create_shelf(strdup(place3),quantity3);
 
-  CU_ASSERT_TRUE(replenish(item1,new_shelf1,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf2,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf3,db));
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf1,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf2,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf3,db), 0);
 
-  CU_ASSERT_TRUE(remove_merch(item1,db));
+  CU_ASSERT_EQUAL(remove_merch(item1,db), 0);
 
   database_destroy(db);
 }
@@ -164,7 +163,7 @@ void test_edit_merch(){
   int price = 200;
   
   item_t *item1 = create_item(strdup(name),strdup(desc),price);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name,db));
 
   char* new_name = "tshirt";
@@ -186,7 +185,7 @@ void test_edit_merch_duplicate(){
   int price = 200;
   
   item_t *item1 = create_item(strdup(name),strdup(desc),price);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name,db));
 
   char* new_name = "tshirt";
@@ -202,10 +201,10 @@ void test_edit_merch_duplicate(){
   int price2 = 200;
   
   item_t *item2 = create_item(strdup(name2),strdup(desc2),price2);
-  CU_ASSERT_TRUE(add_merch(item2,db));
+  CU_ASSERT_EQUAL(add_merch(item2,db), 0);
   CU_ASSERT_TRUE(item_exists(name2,db));
 
-  CU_ASSERT_FALSE(edit_merch(item2, db, strdup(new_name), strdup(new_desc), new_price));
+  CU_ASSERT_EQUAL(edit_merch(item2, db, strdup(new_name), strdup(new_desc), new_price), -1);
 
   
   //list_merch(db);
@@ -219,7 +218,7 @@ void test_replenish(){
   int price1 = 200;
   
   item_t *item1 = create_item(strdup(name1),strdup(desc1),price1);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name1,db));
 
   char* place1 = "A10";
@@ -234,9 +233,9 @@ void test_replenish(){
   size_t quantity3 = 1;
   shelf_t *new_shelf3 = create_shelf(strdup(place3),quantity3);
 
-  CU_ASSERT_TRUE(replenish(item1,new_shelf1,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf2,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf3,db));
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf1,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf2,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf3,db), 0);
 
   show_stock(item1);
   
@@ -250,18 +249,18 @@ void test_replenish_add_to_existing(){
   int price1 = 200;
   
   item_t *item1 = create_item(strdup(name1),strdup(desc1),price1);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name1,db));
 
   char* place1 = "A10";
   size_t quantity1 = 10;
   shelf_t *new_shelf1 = create_shelf(strdup(place1),quantity1);
-  CU_ASSERT_TRUE(replenish(item1,new_shelf1,db));
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf1,db), 0);
 
   size_t quantity2 = 9;
 
   shelf_t *new_shelf2 = create_shelf(strdup(place1),quantity2);
-  CU_ASSERT_FALSE(replenish(item1,new_shelf2,db));
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf2,db), -3);
 
   free_shelf(new_shelf2); 
 
@@ -276,18 +275,18 @@ void test_replenish_with_same_amount(){
   int price1 = 200;
   
   item_t *item1 = create_item(strdup(name1),strdup(desc1),price1);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name1,db));
 
   char* place1 = "A10";
   size_t quantity1 = 10;
   shelf_t *new_shelf1 = create_shelf(strdup(place1),quantity1);
-  CU_ASSERT_TRUE(replenish(item1,new_shelf1,db));
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf1,db), 0);
 
   size_t quantity2 = 10;
 
   shelf_t *new_shelf2 = create_shelf(strdup(place1),quantity2);
-  CU_ASSERT_FALSE(replenish(item1,new_shelf2,db));
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf2,db), -3);
 
   free_shelf(new_shelf2); 
 
@@ -302,7 +301,7 @@ void test_replenish_existing_shelf(){
   int price1 = 200;
   
   item_t *item1 = create_item(strdup(name1),strdup(desc1),price1);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name1,db));
 
   char* place1 = "A10";
@@ -314,8 +313,8 @@ void test_replenish_existing_shelf(){
   shelf_t *new_shelf2 = create_shelf(strdup(place2),quantity2);
 
 
-  CU_ASSERT_TRUE(replenish(item1,new_shelf1,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf2,db));
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf1,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf2,db), 0);
 
   show_stock(item1);
 
@@ -330,7 +329,7 @@ void test_two_items_same_shelf(){
   int price1 = 200;
   
   item_t *item1 = create_item(strdup(name1),strdup(desc1),price1);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name1,db));
 
 
@@ -339,7 +338,7 @@ void test_two_items_same_shelf(){
   int price2 = 20000000;
   
   item_t *item2 = create_item(strdup(name2),strdup(desc2),price2);
-  CU_ASSERT_TRUE(add_merch(item2,db));
+  CU_ASSERT_EQUAL(add_merch(item2,db), 0);
   CU_ASSERT_TRUE(item_exists(name2,db));
 
   
@@ -355,16 +354,16 @@ void test_two_items_same_shelf(){
   size_t quantity3 = 1;
   shelf_t *new_shelf3 = create_shelf(strdup(place3),quantity3);
 
-  CU_ASSERT_TRUE(replenish(item1,new_shelf1,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf2,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf3,db));
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf1,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf2,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf3,db), 0);
 
   
   char* place4 = "A10";
   size_t quantity4 = 1;
   shelf_t *new_shelf4 = create_shelf(strdup(place4),quantity4);
 
-  CU_ASSERT_FALSE(replenish(item2,new_shelf4,db));
+  CU_ASSERT_EQUAL(replenish(item2,new_shelf4,db), -2);
 
   database_destroy(db);
 }
@@ -384,7 +383,7 @@ void test_add_to_cart_single(){
   int price1 = 200;
   
   item_t *item1 = create_item(strdup(name1),strdup(desc1),price1);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name1,db));
 
   char* place1 = "A10";
@@ -399,14 +398,14 @@ void test_add_to_cart_single(){
   size_t quantity3 = 1;
   shelf_t *new_shelf3 = create_shelf(strdup(place3),quantity3);
 
-  CU_ASSERT_TRUE(replenish(item1,new_shelf1,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf2,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf3,db));
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf1,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf2,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf3,db), 0);
 
   int id = 1;
   create_cart(id,db);
 
-  CU_ASSERT_TRUE(add_to_cart(item1,id,10,db));
+  CU_ASSERT_EQUAL(add_to_cart(item1,id,10,db), 0);
 
   database_destroy(db);
 }
@@ -418,7 +417,7 @@ void test_multiple_carts_all_stock_gone(){
   int price1 = 200;
   
   item_t *item1 = create_item(strdup(name1),strdup(desc1),price1);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name1,db));
 
   char* place1 = "A10";
@@ -433,9 +432,9 @@ void test_multiple_carts_all_stock_gone(){
   size_t quantity3 = 1;
   shelf_t *new_shelf3 = create_shelf(strdup(place3),quantity3);
 
-  CU_ASSERT_TRUE(replenish(item1,new_shelf1,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf2,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf3,db));
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf1,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf2,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf3,db), 0);
 
   int id1 = 1;
   create_cart(id1,db);
@@ -446,9 +445,9 @@ void test_multiple_carts_all_stock_gone(){
   int id3 = 3;
   create_cart(id3,db);
 
-  CU_ASSERT_TRUE(add_to_cart(item1,id1,10,db));
-  CU_ASSERT_TRUE(add_to_cart(item1,id2,4,db));
-  CU_ASSERT_TRUE(add_to_cart(item1,id3,5,db));
+  CU_ASSERT_EQUAL(add_to_cart(item1,id1,10,db), 0);
+  CU_ASSERT_EQUAL(add_to_cart(item1,id2,4,db), 0);
+  CU_ASSERT_EQUAL(add_to_cart(item1,id3,5,db), 0);
 
   database_destroy(db);
 }
@@ -460,7 +459,7 @@ void test_add_to_cart_false(){
   int price1 = 200;
   
   item_t *item1 = create_item(strdup(name1),strdup(desc1),price1);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name1,db));
 
   char* place1 = "A10";
@@ -475,9 +474,9 @@ void test_add_to_cart_false(){
   size_t quantity3 = 1;
   shelf_t *new_shelf3 = create_shelf(strdup(place3),quantity3);
 
-  CU_ASSERT_TRUE(replenish(item1,new_shelf1,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf2,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf3,db));
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf1,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf2,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf3,db), 0);
 
   int id1 = 1;
   create_cart(id1,db);
@@ -485,9 +484,9 @@ void test_add_to_cart_false(){
   int id2 = 2;
   create_cart(id2,db);
 
-  CU_ASSERT_TRUE(add_to_cart(item1,id1,10,db));
-  CU_ASSERT_FALSE(add_to_cart(item1,id2,10,db));
-  CU_ASSERT_TRUE(add_to_cart(item1,id1,4,db));
+  CU_ASSERT_EQUAL(add_to_cart(item1,id1,10,db), 0);
+  CU_ASSERT_EQUAL(add_to_cart(item1,id2,10,db), -1);
+  CU_ASSERT_EQUAL(add_to_cart(item1,id1,4,db), 0);
 
   database_destroy(db);
 }
@@ -499,7 +498,7 @@ void test_cart_add_remove(){
   int price1 = 200;
   
   item_t *item1 = create_item(strdup(name1),strdup(desc1),price1);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name1,db));
 
   char* place1 = "A10";
@@ -514,15 +513,15 @@ void test_cart_add_remove(){
   size_t quantity3 = 1;
   shelf_t *new_shelf3 = create_shelf(strdup(place3),quantity3);
 
-  CU_ASSERT_TRUE(replenish(item1,new_shelf1,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf2,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf3,db));
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf1,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf2,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf3,db), 0);
 
   int id1 = 1;
   create_cart(id1,db);
   
-  CU_ASSERT_TRUE(add_to_cart(item1,id1,10,db));
-  CU_ASSERT_TRUE(remove_from_cart(item1,id1,5,db));
+  CU_ASSERT_EQUAL(add_to_cart(item1,id1,10,db), 0);
+  CU_ASSERT_EQUAL(remove_from_cart(item1,id1,5,db), 0);
   database_destroy(db);
 
 }
@@ -534,7 +533,7 @@ void test_cart_add_remove_to_much(){
   int price1 = 200;
   
   item_t *item1 = create_item(strdup(name1),strdup(desc1),price1);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name1,db));
 
   char* place1 = "A10";
@@ -549,15 +548,15 @@ void test_cart_add_remove_to_much(){
   size_t quantity3 = 1;
   shelf_t *new_shelf3 = create_shelf(strdup(place3),quantity3);
 
-  CU_ASSERT_TRUE(replenish(item1,new_shelf1,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf2,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf3,db));
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf1,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf2,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf3,db), 0);
 
   int id1 = 1;
   create_cart(id1,db);
   
-  CU_ASSERT_TRUE(add_to_cart(item1,id1,10,db));
-  CU_ASSERT_FALSE(remove_from_cart(item1,id1,11,db));
+  CU_ASSERT_EQUAL(add_to_cart(item1,id1,10,db), 0);
+  CU_ASSERT_EQUAL(remove_from_cart(item1,id1,11,db), -3);
 
   database_destroy(db);
 }
@@ -569,7 +568,7 @@ void test_add_remove_add_cart(){
   int price1 = 200;
   
   item_t *item1 = create_item(strdup(name1),strdup(desc1),price1);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name1,db));
 
   char* place1 = "A10";
@@ -584,16 +583,16 @@ void test_add_remove_add_cart(){
   size_t quantity3 = 1;
   shelf_t *new_shelf3 = create_shelf(strdup(place3),quantity3);
 
-  CU_ASSERT_TRUE(replenish(item1,new_shelf1,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf2,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf3,db));
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf1,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf2,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf3,db), 0);
 
   int id1 = 1;
   create_cart(id1,db);
   
-  CU_ASSERT_TRUE(add_to_cart(item1,id1,10,db));
-  CU_ASSERT_TRUE(remove_from_cart(item1,id1,10,db));
-  CU_ASSERT_TRUE(add_to_cart(item1,id1,18,db));
+  CU_ASSERT_EQUAL(add_to_cart(item1,id1,10,db), 0);
+  CU_ASSERT_EQUAL(remove_from_cart(item1,id1,10,db), 0);
+  CU_ASSERT_EQUAL(add_to_cart(item1,id1,18,db), 0);
 
   database_destroy(db);
 }
@@ -605,7 +604,7 @@ void test_calculate_cost_single_item(){
   int price1 = 200;
   
   item_t *item1 = create_item(strdup(name1),strdup(desc1),price1);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name1,db));
 
   char* place1 = "A10";
@@ -620,14 +619,14 @@ void test_calculate_cost_single_item(){
   // size_t quantity3 = 1;
   // shelf_t *new_shelf3 = create_shelf(strdup(place3),quantity3);
 
-  CU_ASSERT_TRUE(replenish(item1,new_shelf1,db));
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf1,db), 0);
   // CU_ASSERT_TRUE(replenish(item1,new_shelf2,db));
   // CU_ASSERT_TRUE(replenish(item1,new_shelf3,db));
 
   int id1 = 1;
   create_cart(id1,db);
   
-  CU_ASSERT_TRUE(add_to_cart(item1,id1,10,db));
+  CU_ASSERT_EQUAL(add_to_cart(item1,id1,10,db), 0);
   CU_ASSERT_EQUAL(calculate_cost(id1,db),2000);
 
   database_destroy(db);
@@ -640,7 +639,7 @@ void test_multiple_shelfs_single_item(){
   int price1 = 200;
   
   item_t *item1 = create_item(strdup(name1),strdup(desc1),price1);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name1,db));
 
   char* place1 = "A10";
@@ -655,14 +654,14 @@ void test_multiple_shelfs_single_item(){
   size_t quantity3 = 12;
   shelf_t *new_shelf3 = create_shelf(strdup(place3),quantity3);
 
-  CU_ASSERT_TRUE(replenish(item1,new_shelf1,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf2,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf3,db));
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf1,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf2,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf3,db), 0);
 
   int id1 = 1;
   create_cart(id1,db);
   
-  CU_ASSERT_TRUE(add_to_cart(item1,id1,20,db));
+  CU_ASSERT_EQUAL(add_to_cart(item1,id1,20,db), 0);
   CU_ASSERT_EQUAL(calculate_cost(id1,db),4000);
 
   database_destroy(db);
@@ -675,7 +674,7 @@ void test_multiple_items_shelfs(){
   int price1 = 200;
   
   item_t *item1 = create_item(strdup(name1),strdup(desc1),price1);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name1,db));
 
   char* place1 = "A10";
@@ -690,16 +689,16 @@ void test_multiple_items_shelfs(){
   size_t quantity3 = 12;
   shelf_t *new_shelf3 = create_shelf(strdup(place3),quantity3);
 
-  CU_ASSERT_TRUE(replenish(item1,new_shelf1,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf2,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf3,db));
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf1,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf2,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf3,db), 0);
 
   char* name2 = "skor";
   char* desc2 = "str 42";
   int price2 = 100;
   
   item_t *item2 = create_item(strdup(name2),strdup(desc2),price2);
-  CU_ASSERT_TRUE(add_merch(item2,db));
+  CU_ASSERT_EQUAL(add_merch(item2,db), 0);
   CU_ASSERT_TRUE(item_exists(name2,db));
 
   char* place4 = "A13";
@@ -714,15 +713,15 @@ void test_multiple_items_shelfs(){
   size_t quantity6 = 12;
   shelf_t *new_shelf6 = create_shelf(strdup(place6),quantity6);
 
-  CU_ASSERT_TRUE(replenish(item2,new_shelf4,db));
-  CU_ASSERT_TRUE(replenish(item2,new_shelf5,db));
-  CU_ASSERT_TRUE(replenish(item2,new_shelf6,db));
+  CU_ASSERT_EQUAL(replenish(item2,new_shelf4,db), 0);
+  CU_ASSERT_EQUAL(replenish(item2,new_shelf5,db), 0);
+  CU_ASSERT_EQUAL(replenish(item2,new_shelf6,db), 0);
 
   int id1 = 1;
   create_cart(id1,db);
 
-  CU_ASSERT_TRUE(add_to_cart(item1,id1,20,db));
-  CU_ASSERT_TRUE(add_to_cart(item2,id1,20,db));
+  CU_ASSERT_EQUAL(add_to_cart(item1,id1,20,db), 0);
+  CU_ASSERT_EQUAL(add_to_cart(item2,id1,20,db), 0);
 
   CU_ASSERT_EQUAL(calculate_cost(id1,db),6000);
 
@@ -736,7 +735,7 @@ void test_checkout_complete(){
   int price1 = 200;
   
   item_t *item1 = create_item(strdup(name1),strdup(desc1),price1);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name1,db));
 
   char* place1 = "A10";
@@ -751,16 +750,16 @@ void test_checkout_complete(){
   size_t quantity3 = 12;
   shelf_t *new_shelf3 = create_shelf(strdup(place3),quantity3);
 
-  CU_ASSERT_TRUE(replenish(item1,new_shelf1,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf2,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf3,db));
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf1,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf2,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf3,db), 0);
 
   int id1 = 1;
   create_cart(id1,db);
   
-  CU_ASSERT_TRUE(add_to_cart(item1,id1,20,db));
+  CU_ASSERT_EQUAL(add_to_cart(item1,id1,20,db), 0);
   CU_ASSERT_EQUAL(calculate_cost(id1,db),4000);
-  CU_ASSERT_TRUE(checkout(id1,db));
+  CU_ASSERT_EQUAL(checkout(id1,db), 0);
   
   database_destroy(db);
 }
@@ -772,7 +771,7 @@ void test_checkout_cart_NULL(){
   int price1 = 200;
   
   item_t *item1 = create_item(strdup(name1),strdup(desc1),price1);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name1,db));
 
   char* place1 = "A10";
@@ -787,16 +786,16 @@ void test_checkout_cart_NULL(){
   size_t quantity3 = 12;
   shelf_t *new_shelf3 = create_shelf(strdup(place3),quantity3);
 
-  CU_ASSERT_TRUE(replenish(item1,new_shelf1,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf2,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf3,db));
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf1,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf2,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf3,db), 0);
 
   int id1 = 1;
   int fake_id = 2;
   create_cart(id1,db);
   
-  CU_ASSERT_TRUE(add_to_cart(item1,id1,20,db));
-  CU_ASSERT_FALSE(checkout(fake_id,db));
+  CU_ASSERT_EQUAL(add_to_cart(item1,id1,20,db), 0);
+  CU_ASSERT_EQUAL(checkout(fake_id,db), -1);
   
   database_destroy(db);
 }
@@ -808,7 +807,7 @@ void test_checkout_multiple_carts(){
   int price1 = 200;
   
   item_t *item1 = create_item(strdup(name1),strdup(desc1),price1);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name1,db));
 
   char* place1 = "A10";
@@ -823,9 +822,9 @@ void test_checkout_multiple_carts(){
   size_t quantity3 = 12;
   shelf_t *new_shelf3 = create_shelf(strdup(place3),quantity3);
 
-  CU_ASSERT_TRUE(replenish(item1,new_shelf1,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf2,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf3,db));
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf1,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf2,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf3,db), 0);
 
   int id1 = 1;
   int id2 = 2;
@@ -833,13 +832,13 @@ void test_checkout_multiple_carts(){
   create_cart(id1,db);
   create_cart(id2,db);
 
-  CU_ASSERT_TRUE(add_to_cart(item1,id1,20,db));
+  CU_ASSERT_EQUAL(add_to_cart(item1,id1,20,db), 0);
   CU_ASSERT_EQUAL(calculate_cost(id1,db),4000);
-  CU_ASSERT_TRUE(checkout(id1,db));
+  CU_ASSERT_EQUAL(checkout(id1,db), 0);
 
-  CU_ASSERT_FALSE(add_to_cart(item1,id2,11,db));
-  CU_ASSERT_TRUE(add_to_cart(item1,id2,10,db));
-  CU_ASSERT_TRUE(checkout(id2,db));
+  CU_ASSERT_EQUAL(add_to_cart(item1,id2,11,db), -1);
+  CU_ASSERT_EQUAL(add_to_cart(item1,id2,10,db), 0);
+  CU_ASSERT_EQUAL(checkout(id2,db), 0);
 
   database_destroy(db);
 }
@@ -851,7 +850,7 @@ void test_remove_merch_reserved(){
   int price1 = 200;
   
   item_t *item1 = create_item(strdup(name1),strdup(desc1),price1);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name1,db));
 
   char* place1 = "A10";
@@ -866,21 +865,21 @@ void test_remove_merch_reserved(){
   size_t quantity3 = 12;
   shelf_t *new_shelf3 = create_shelf(strdup(place3),quantity3);
 
-  CU_ASSERT_TRUE(replenish(item1,new_shelf1,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf2,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf3,db));
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf1,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf2,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf3,db), 0);
 
   int id1 = 1;
   create_cart(id1,db);
   
-  CU_ASSERT_TRUE(add_to_cart(item1,id1,20,db));
+  CU_ASSERT_EQUAL(add_to_cart(item1,id1,20,db), 0);
 
-  CU_ASSERT_FALSE(remove_merch(item1,db));
+  CU_ASSERT_EQUAL(remove_merch(item1,db), -1);
   
   CU_ASSERT_EQUAL(calculate_cost(id1,db),4000);
-  CU_ASSERT_TRUE(checkout(id1,db));
+  CU_ASSERT_EQUAL(checkout(id1,db), 0);
   
-  CU_ASSERT_TRUE(remove_merch(item1,db));
+  CU_ASSERT_EQUAL(remove_merch(item1,db), 0);
 
   database_destroy(db);
 }
@@ -892,7 +891,7 @@ void test_edit_merch_in_cart(){
   int price1 = 200;
   
   item_t *item1 = create_item(strdup(name1),strdup(desc1),price1);
-  CU_ASSERT_TRUE(add_merch(item1,db));
+  CU_ASSERT_EQUAL(add_merch(item1,db), 0);
   CU_ASSERT_TRUE(item_exists(name1,db));
 
   char* place1 = "A10";
@@ -907,14 +906,14 @@ void test_edit_merch_in_cart(){
   size_t quantity3 = 12;
   shelf_t *new_shelf3 = create_shelf(strdup(place3),quantity3);
 
-  CU_ASSERT_TRUE(replenish(item1,new_shelf1,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf2,db));
-  CU_ASSERT_TRUE(replenish(item1,new_shelf3,db));
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf1,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf2,db), 0);
+  CU_ASSERT_EQUAL(replenish(item1,new_shelf3,db), 0);
 
   int id1 = 1;
   create_cart(id1,db);
   
-  CU_ASSERT_TRUE(add_to_cart(item1,id1,20,db));
+  CU_ASSERT_EQUAL(add_to_cart(item1,id1,20,db), 0);
   CU_ASSERT_EQUAL(calculate_cost(id1,db),4000);
 
 
@@ -922,9 +921,9 @@ void test_edit_merch_in_cart(){
   char* new_desc = "REA! (lite smutsig)";
   int new_price = 100;
 
-  CU_ASSERT_TRUE(edit_merch(item1,db,strdup(new_name),strdup(new_desc),new_price));
+  CU_ASSERT_EQUAL(edit_merch(item1,db,strdup(new_name),strdup(new_desc),new_price), 0);
   CU_ASSERT_EQUAL(calculate_cost(id1,db),2000);
-  CU_ASSERT_TRUE(checkout(id1,db));
+  CU_ASSERT_EQUAL(checkout(id1,db), 0);
   
   database_destroy(db);
 }
