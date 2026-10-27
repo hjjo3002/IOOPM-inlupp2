@@ -5,11 +5,5 @@
 #include <stdbool.h>
 #include <ctype.h>
 
-
-bool answer_loop(answer_t answer);
-
-void print_ui_menu();
-
-bool yes_or_no();
-
+/// @brief starts the users webstore interface. 
 void run_webstore();

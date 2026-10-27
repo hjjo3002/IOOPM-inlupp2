@@ -4,7 +4,7 @@ LDLIBS = -lcunit
 
 PROFLAGS = -pg
 TIME = time --6verbose
-VALGRIND = valgrind
+VALGRIND = valgrind --leak-check=full
 COVERAGE = gcovr -r .
 
 
@@ -17,6 +17,9 @@ main: main.o logic.o datastruct.o ui.o utils.o
 run: main 
 	./main
 	
+valgrind_ui: main
+	$(VALGRIND) ./main <webstoretest.txt 
+
 
 logic: datastruct.c logic.c 
 	$(CC) $(CFLAGS) -c logic.c
@@ -35,7 +38,7 @@ test: compile_test
 	./compile_test
 
 valgrind: compile_test
-	valgrind --leak-check=full ./compile_test 
+	$(VALGRIND) ./compile_test 
 
 all: compile_test
 

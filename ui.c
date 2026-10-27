@@ -11,13 +11,13 @@ static bool is_in_menu(char *let){
     else{return false;}
 }
 
-answer_t strdup_answer_t(char* str){
+static answer_t strdup_answer_t(char* str){
     answer_t answer;
     answer.string_value=strdup(str);
     return answer;
 }
 
-answer_t atoi_answer_t(char *str){
+static answer_t atoi_answer_t(char *str){
     answer_t answer;
     answer.int_value = atoi(str);
     return answer;
@@ -29,8 +29,7 @@ static char ask_question_in_menu(){
     return toupper(str[0]);
 }
 
-
-void print_ui_menu(){
+static void print_ui_menu(){
 
     printf("welcome to our webstore\n"
         "here is your alternatives;\n"
@@ -50,18 +49,7 @@ void print_ui_menu(){
         );
 }
 
-/*
-list merch - 20 at a time 
-
-remove merch y/n
-
-edit merch y/n
-
-remove cart y/n
-
-quit y/n
-
-*/
+//TODO list merch, print 20 at a time
 
 static char *ask_name(char *question){
     answer_t answer = ask_question(question, not_empty, strdup_answer_t);
@@ -78,7 +66,7 @@ static int ask_price(char *question){
     return answer.int_value;
 }
 
-int ask_question_id(){
+static int ask_question_id(){
     answer_t answer = ask_question("id of cart: ", is_number, atoi_answer_t);
     return answer.int_value;
 }
@@ -104,7 +92,8 @@ static bool yes_or_no(){
 }
 
 
-item_t *ask_question_merch(){
+
+static item_t *ask_question_merch(){
     char *name = ask_name("name of merch: ");
     char *desc = ask_desc("description of merch: ");
     int price = ask_price("price of merch: ");
@@ -112,7 +101,7 @@ item_t *ask_question_merch(){
     return create_item(name, desc, price);
 }
 
-item_t *ask_question_rem_merch(database_t *db){
+static item_t *ask_question_rem_merch(database_t *db){
     while(true){
         char *name = ask_name("name of merch: ");
 
@@ -127,7 +116,7 @@ item_t *ask_question_rem_merch(database_t *db){
     }
 }
 
-int ask_question_edit_merch(database_t *db){
+static int ask_question_edit_merch(database_t *db){
     char *old_name = ask_name("name of old merch: ");
     item_t *item = find_item(old_name, db);
     free(old_name);
@@ -140,17 +129,18 @@ int ask_question_edit_merch(database_t *db){
     char *desc = ask_desc("new description of merch: ");
     int price = ask_price("new price of merch: ");
 
+    if(!yes_or_no()){
+        return 0;
+    }
+
+
     int res = edit_merch(item, db, name, desc, price);
 
-    if(res!=0){
-        free(name);
-        free(desc);
-    }
 
     return res;
 }
 
-int ask_question_replenish(database_t *db){
+static int ask_question_replenish(database_t *db){
     char *place = ask_shelf_place();
     char *name = ask_name("name of merch: ");
     size_t quantity = ask_quantity("quantity of shelf: ");
@@ -174,7 +164,7 @@ int ask_question_replenish(database_t *db){
     return res;
 }
 
-int ask_question_add_to_cart(database_t *db){
+static int ask_question_add_to_cart(database_t *db){
     int id = ask_question_id();
     char *name = ask_name("name of merch: ");
     size_t quantity = ask_quantity("quantity of item: ");
@@ -185,19 +175,19 @@ int ask_question_add_to_cart(database_t *db){
     return add_to_cart(item, id, quantity, db);
 }
 
-size_t calc_cost_question(database_t *db){
+static size_t calc_cost_question(database_t *db){
     int id = ask_question_id();
     
     return calculate_cost(id, db);
 }
 
-void ask_question_stock(database_t *db){
+static void ask_question_stock(database_t *db){
     char* name = ask_name("name of item");
     item_t *item = find_item(name,db);
     show_stock(item);
 }
 
-int ask_question_remove_from_cart(database_t *db){
+static int ask_question_remove_from_cart(database_t *db){
     int id = ask_question_id();
     char *name = ask_name("name of merch: ");
     size_t quantity = ask_quantity("quantity of item: ");
@@ -205,11 +195,16 @@ int ask_question_remove_from_cart(database_t *db){
     item_t *item = find_item(name, db);
     free(name);
 
+    if(!yes_or_no()){
+        return 0;
+    }
+
     return remove_from_cart(item, id, quantity, db);
 }
 
 
-void add_item_loop(database_t *db){
+
+static void add_item_loop(database_t *db){
     int res;
 
     do{
@@ -220,12 +215,16 @@ void add_item_loop(database_t *db){
     }while(res!=0);
 }
 
-void remove_item_loop(database_t *db){
-    yes_or_no();
+static void remove_item_loop(database_t *db){
     int res;
 
     do{
         item_t *item = ask_question_rem_merch(db);
+        
+        if(!yes_or_no()){
+            return;
+        }
+
         res = remove_merch(item,db);
 
         if(res==-1){printf("failed, item is reserved in cart\n");}
@@ -236,8 +235,7 @@ void remove_item_loop(database_t *db){
     }while(res!=0);
 }
 
-void edit_merch_loop(database_t *db){
-    yes_or_no();
+static void edit_merch_loop(database_t *db){
     int res;
     do{
         res = ask_question_edit_merch(db);
@@ -245,7 +243,7 @@ void edit_merch_loop(database_t *db){
     }while(res!=0);
 }
 
-void replenish_loop(database_t *db){
+static void replenish_loop(database_t *db){
     int res;
     do{
         res = ask_question_replenish(db);
@@ -257,7 +255,7 @@ void replenish_loop(database_t *db){
     }while(res!=0);
 }
 
-void add_to_cart_loop(database_t *db){
+static void add_to_cart_loop(database_t *db){
     int res;
     do{
         res = ask_question_add_to_cart(db);
@@ -266,7 +264,7 @@ void add_to_cart_loop(database_t *db){
     }while(res!=0);
 }
 
-void remove_from_cart_loop(database_t *db){
+static void remove_from_cart_loop(database_t *db){
     int res;
     do{
         res = ask_question_remove_from_cart(db);
@@ -276,7 +274,7 @@ void remove_from_cart_loop(database_t *db){
     }while(res!=0);
 }
 
-void checkout_loop(database_t *db){
+static void checkout_loop(database_t *db){
     int res;
 
     do{
@@ -289,10 +287,18 @@ void checkout_loop(database_t *db){
     }while(res!=0);
 }
 
+static void remove_cart_loop(database_t *db){
+    int id = ask_question_id();
+        
+    if(!yes_or_no()){
+        return;
+    }
+
+    remove_cart(id,db);
+}
 
 
-
-void choose_action(char answer,database_t *db){
+static void choose_action(char answer,database_t *db){
     if(answer=='A'){
         add_item_loop(db);
     }
@@ -316,9 +322,7 @@ void choose_action(char answer,database_t *db){
         create_cart(id,db);
     }
     if(answer=='R'){
-        yes_or_no();
-        int id = ask_question_id();
-        remove_cart(id,db);
+        remove_cart_loop(db);
     }
     if(answer=='+'){
         add_to_cart_loop(db);
@@ -339,14 +343,15 @@ void choose_action(char answer,database_t *db){
 
 }
 
-
 void run_webstore(){
-    char answer = ' ';
     database_t *db = create_database();
+    char answer = ' ';
 
     while (answer != 'Q' && answer != 'q'){
     print_ui_menu();
     answer = ask_question_in_menu();
     choose_action(answer,db);
     }
+    database_destroy(db);
 }
+

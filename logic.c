@@ -354,7 +354,6 @@ static bool remove_quantity_from_shelfs(item_t *item, size_t quantity, int id, d
             ioopm_list_iterator_remove(it);
             stock_left=stock_left-shelf_quantity;
             //free???????? remove from db->cart
-            ioopm_hash_table_remove(db->carts,INT_AS_ELEM(id),&result);
             free_shelf(current_shelf);
         }
     }
@@ -412,6 +411,14 @@ int remove_merch(item_t *item, database_t *db){
 int edit_merch(item_t *old_item, database_t *db, char* new_name, char* new_desc, int new_price){
     //TODO edit in items, if edit name -> change key in shelfs.
     ioopm_hash_table_t *items = db->items;
+    char* old_name = old_item->name;
+
+    //if we want to change desc: if(oldname==newname){...}
+    if(strcmp(old_name,new_name)==0){
+        edit_ht_items(old_item, db, new_name, new_desc, new_price);
+        return 0;
+    }
+
 
     if(ioopm_hash_table_has_key(items,PTR_AS_ELEM(new_name))){
         free(new_name);
@@ -457,7 +464,7 @@ int replenish(item_t *item, shelf_t *upd_shelf, database_t *db){
         item_t *found_item = result.p;
 
         if (found_item != item){
-            free_shelf(upd_shelf);
+            //free_shelf(upd_shelf);
             return -2; //another item at upd_shelfs place
         }
         shelf_t *existing = find_shelf(item, place);
@@ -489,6 +496,10 @@ cart_t* create_cart(int id, database_t *db){
 
 void remove_cart(int id, database_t *db){
     cart_t *cart = find_cart(id,db);
+
+    value_t result;
+    ioopm_hash_table_remove(db->carts, INT_AS_ELEM(id), &result);
+
     free_cart(cart);
 }
 //notes: checkout handles removing actual quantity from warehouse
@@ -611,6 +622,10 @@ int checkout(int id, database_t *db){
         }
     // destroy and clean the cart
     ioopm_hash_table_iterator_destroy(it);
+
+    value_t result;
+    ioopm_hash_table_remove(db->carts, INT_AS_ELEM(id), &result);
+    
     free_cart(cart);
     return 0;
 }
