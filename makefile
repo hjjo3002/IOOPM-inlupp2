@@ -37,7 +37,7 @@ compile_test: logic.o ui.o testfile.o utils.o datastruct.o
 test: compile_test
 	./compile_test
 
-valgrind: compile_test
+valgrind_logic: compile_test
 	$(VALGRIND) ./compile_test 
 
 all: compile_test
@@ -48,5 +48,5 @@ clean:
 	rm -f *.gcda *.gcno *.gcov
 	rm -f gmon.out profile.txt
 
-.PHONY: clean valgrind test all 
+.PHONY: clean valgrind_ui valgrind_logic test all 
 

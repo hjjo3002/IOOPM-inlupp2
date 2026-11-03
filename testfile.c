@@ -363,8 +363,10 @@ void test_two_items_same_shelf(){
   size_t quantity4 = 1;
   shelf_t *new_shelf4 = create_shelf(strdup(place4),quantity4);
 
+  
   CU_ASSERT_EQUAL(replenish(item2,new_shelf4,db), -2);
-
+  
+  free_shelf(new_shelf4);
   database_destroy(db);
 }
 

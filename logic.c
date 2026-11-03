@@ -324,7 +324,7 @@ static size_t get_reserved_stock(item_t *item, database_t *db){
     return reserved_stock;
 }
 //helper for checkout
-static bool remove_quantity_from_shelfs(item_t *item, size_t quantity, int id, database_t *db){
+static bool remove_quantity_from_shelfs(item_t *item, size_t quantity, database_t *db){
     //go in to item linked list, look at fist elem, 
     ioopm_list_t *item_list = item->shelfs;
     ioopm_list_iterator_t *it = ioopm_list_iterator_create(item_list);
@@ -613,7 +613,7 @@ int checkout(int id, database_t *db){
         size_t quantity_of_item = quantity_in_value_t.s;
 
         //now we got item_t & quantity, remove from shelfs
-        if(!remove_quantity_from_shelfs(current_item,quantity_of_item,id,db)){
+        if(!remove_quantity_from_shelfs(current_item,quantity_of_item,db)){
             ioopm_hash_table_iterator_destroy(it);
             return -2; //remove from shelfs failed
         }
