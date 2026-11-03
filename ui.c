@@ -26,7 +26,9 @@ static answer_t atoi_answer_t(char *str){
 static char ask_question_in_menu(){
     answer_t answer = ask_question("choose your alternative:",is_in_menu,(convert_func *) strdup_answer_t);
     char* str = answer.string_value;
-    return toupper(str[0]);
+    char res = toupper(str[0]);
+    free(str);
+    return res;
 }
 
 static void print_ui_menu(){
@@ -185,6 +187,7 @@ static void ask_question_stock(database_t *db){
     char* name = ask_name("name of item");
     item_t *item = find_item(name,db);
     show_stock(item);
+    free(name);
 }
 
 static int ask_question_remove_from_cart(database_t *db){
@@ -298,59 +301,83 @@ static void remove_cart_loop(database_t *db){
 }
 
 
-static void choose_action(char answer,database_t *db){
+static bool choose_action(char answer,database_t *db){
     if(answer=='A'){
         add_item_loop(db);
+        return true;
+
     }
     if(answer=='L'){
         list_merch(db);
+        return true;
+
     }
     if(answer=='D'){
-        remove_item_loop(db); 
+        remove_item_loop(db);
+        return true;
+
     }
     if(answer=='E'){
         edit_merch_loop(db);
+        return true;
+
     }
     if(answer=='S'){
         ask_question_stock(db);
+        return true;
     }
     if(answer=='P'){
         replenish_loop(db);
+        return true;
+
     }
     if(answer=='C'){
         int id =ask_question_id();
         create_cart(id,db);
+        return true;
+
     }
     if(answer=='R'){
         remove_cart_loop(db);
+        return true;
+
     }
     if(answer=='+'){
         add_to_cart_loop(db);
+        return true;
+
     }
     if(answer=='-'){
         remove_from_cart_loop(db);
+        return true;
     }
     if(answer=='='){
         size_t price = calc_cost_question(db);
         printf("the price of cart is %zu kr\n",price);
+        return true;
+
     }
     if(answer=='O'){
         checkout_loop(db);
+        return true;
     }
     if(answer=='Q'){
         yes_or_no();
+        return false;
     }
-
+    else return false;
 }
 
 void run_webstore(){
     database_t *db = create_database();
-    char answer = ' ';
+    char answer;
+    bool keep_going = true;
 
-    while (answer != 'Q' && answer != 'q'){
+    while (keep_going){
     print_ui_menu();
     answer = ask_question_in_menu();
-    choose_action(answer,db);
+   
+    keep_going = choose_action(answer,db);
     }
     database_destroy(db);
 }
