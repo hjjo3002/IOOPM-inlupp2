@@ -1,5 +1,5 @@
 
-CFLAGS = -Wall -Wextra -g
+CFLAGS = -Wall -Wextra -g --coverage
 LDLIBS = -lcunit
 
 PROFLAGS = -pg
@@ -42,11 +42,16 @@ valgrind_logic: compile_test
 
 all: compile_test
 
+coverage: test
+	$(COVERAGE) --filter='logic.c'
+
+
 clean:
 	rm -f *.o 
 	rm -f compile_test
+	rm -f main
 	rm -f *.gcda *.gcno *.gcov
 	rm -f gmon.out profile.txt
 
-.PHONY: clean valgrind_ui valgrind_logic test all 
+.PHONY: clean valgrind_ui valgrind_logic test all coverage
 
