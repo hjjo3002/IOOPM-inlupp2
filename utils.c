@@ -91,3 +91,19 @@ answer_t ask_question(char *question, check_func *check,convert_func *con){
 int compare_str_alphabetical(const void *a, const void *b){
     return strcmp(*(const char**)a, *(const char**)b);
 }
+
+bool is_positive(char *str) {
+    int len = strlen(str);
+
+    if (len == 0) {
+        return false;
+    }
+
+    for (int i = 0; i < len; i++) {
+        if (!isdigit((unsigned char)str[i])) {
+            return false;
+        }
+    }
+
+    return true;
+}

@@ -323,7 +323,7 @@ static size_t get_reserved_stock(item_t *item, database_t *db){
 
     return reserved_stock;
 }
-//helper for checkout
+//helper for ioopm_checkout
 static bool remove_quantity_from_shelfs(item_t *item, size_t quantity, database_t *db){
     //go in to item linked list, look at fist elem, 
     ioopm_list_t *item_list = item->shelfs;
@@ -334,7 +334,7 @@ static bool remove_quantity_from_shelfs(item_t *item, size_t quantity, database_
     {
         if(ioopm_list_iterator_at_end(it)){
             ioopm_list_iterator_destroy(it);
-            return false; //should not be reachable due to add_to_cart implementaton
+            return false; //should not be reachable due to ioopm_add_to_cart implementaton
         }
 
         value_t current_item = ioopm_list_iterator_current(it);
@@ -363,7 +363,7 @@ static bool remove_quantity_from_shelfs(item_t *item, size_t quantity, database_
 
 //main functions:
 
-int add_merch(item_t *item, database_t *db){
+int ioopm_add_merch(item_t *item, database_t *db){
    ioopm_hash_table_t *items=db->items;
    char* name_check = item->name;
 
@@ -378,7 +378,7 @@ int add_merch(item_t *item, database_t *db){
    }
 }
 
-void list_merch(database_t *db){
+void ioopm_list_merch(database_t *db){
     //TODO prints (alphabetical order) items in ht items (not 20 at a time, ui's task)
     ioopm_hash_table_t *ht = db->items;
 
@@ -391,7 +391,7 @@ void list_merch(database_t *db){
     free(arr);
 }
 
-int remove_merch(item_t *item, database_t *db){
+int ioopm_remove_merch(item_t *item, database_t *db){
     if(get_reserved_stock(item,db)>0){ //check for no carts have item in cart
         return -1; //carts with item resereved
     }
@@ -408,7 +408,7 @@ int remove_merch(item_t *item, database_t *db){
     else return -3; //remove from items failed
 }
 
-int edit_merch(item_t *old_item, database_t *db, char* new_name, char* new_desc, int new_price){
+int ioopm_edit_merch(item_t *old_item, database_t *db, char* new_name, char* new_desc, int new_price){
     //TODO edit in items, if edit name -> change key in shelfs.
     ioopm_hash_table_t *items = db->items;
     char* old_name = old_item->name;
@@ -432,7 +432,7 @@ int edit_merch(item_t *old_item, database_t *db, char* new_name, char* new_desc,
     }
 }
 
-void show_stock(item_t *item){
+void ioopm_show_stock(item_t *item){
     ioopm_list_t *shelfs = item->shelfs;
     size_t length = linked_list_size(shelfs);
     char* name = item->name;
@@ -450,7 +450,7 @@ void show_stock(item_t *item){
     free(arr);
 }
 
-int replenish(item_t *item, shelf_t *upd_shelf, database_t *db){
+int ioopm_replenish(item_t *item, shelf_t *upd_shelf, database_t *db){
     char *place = upd_shelf->place;
     value_t result;
 
@@ -486,7 +486,7 @@ int replenish(item_t *item, shelf_t *upd_shelf, database_t *db){
     return 0; //success
 }
 
-cart_t* create_cart(int id, database_t *db){
+cart_t* ioopm_create_cart(int id, database_t *db){
     cart_t *cart = calloc(1,sizeof(cart_t));
     cart->id = id;
     cart->items = ioopm_hash_table_create(ptr_hash,ptr_comp);
@@ -494,7 +494,7 @@ cart_t* create_cart(int id, database_t *db){
     return cart;
 }
 
-void remove_cart(int id, database_t *db){
+void ioopm_remove_cart(int id, database_t *db){
     cart_t *cart = find_cart(id,db);
 
     value_t result;
@@ -502,8 +502,8 @@ void remove_cart(int id, database_t *db){
 
     free_cart(cart);
 }
-//notes: checkout handles removing actual quantity from warehouse
-int add_to_cart(item_t *item, int id, size_t quantity, database_t *db){
+//notes: ioopm_checkout handles removing actual quantity from warehouse
+int ioopm_add_to_cart(item_t *item, int id, size_t quantity, database_t *db){
     //TODO check stock
     cart_t *cart = find_cart(id,db);
     ioopm_hash_table_t* cart_ht = cart->items;
@@ -529,7 +529,7 @@ int add_to_cart(item_t *item, int id, size_t quantity, database_t *db){
 
 }
 
-int remove_from_cart(item_t *item, int id, size_t quantity, database_t *db){
+int ioopm_remove_from_cart(item_t *item, int id, size_t quantity, database_t *db){
     //TODO removes said item from a cart, 
     cart_t *cart = find_cart(id,db);
     ioopm_hash_table_t *cart_ht = cart->items;
@@ -562,7 +562,7 @@ int remove_from_cart(item_t *item, int id, size_t quantity, database_t *db){
     return 0;
 }
 
-size_t calculate_cost(int id, database_t *db){
+size_t ioopm_calculate_cost(int id, database_t *db){
     //TODO calculate the cost of the whole cart. 
     size_t total_price = 0;
     cart_t *cart = find_cart(id,db);
@@ -593,7 +593,7 @@ size_t calculate_cost(int id, database_t *db){
     return total_price;
 }
 
-int checkout(int id, database_t *db){
+int ioopm_checkout(int id, database_t *db){
     //make sure to remove same from db->shelf
     cart_t *cart = find_cart(id,db);
 

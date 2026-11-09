@@ -32,3 +32,4 @@ answer_t ask_question(char *question, check_func *check,convert_func *con);
 
 int compare_str_alphabetical(const void *a, const void *b);
 
+bool is_positive(char* str);

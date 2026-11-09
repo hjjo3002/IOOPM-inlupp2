@@ -10,6 +10,8 @@ A user interface file who builds the interface and takes care of input from the 
 
 A utils file with general helper functions used throughtout the code. 
 
+A datastruct file for the underlying datastructures from inlupp 1.
+
 A test file for the logic of the backend. 
 
 # Requirements 

@@ -37,12 +37,9 @@ C
 +
 2
 Glass
-3
 -
 2
 Glass
-1
-y
 D
 CCZ
 Y
