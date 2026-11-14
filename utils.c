@@ -33,6 +33,10 @@ bool is_number(char *str)
 {
     int len = strlen(str);
 
+    if(strlen(str)==0){
+        return false;
+    }
+
     for(int i = 0; i<len; i++)
     {
         bool res = isdigit(str[i]);
@@ -107,3 +111,4 @@ bool is_positive(char *str) {
 
     return true;
 }
+

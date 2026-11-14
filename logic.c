@@ -409,7 +409,6 @@ int ioopm_remove_merch(item_t *item, database_t *db){
 }
 
 int ioopm_edit_merch(item_t *old_item, database_t *db, char* new_name, char* new_desc, int new_price){
-    //TODO edit in items, if edit name -> change key in shelfs.
     ioopm_hash_table_t *items = db->items;
     char* old_name = old_item->name;
 
@@ -487,6 +486,9 @@ int ioopm_replenish(item_t *item, shelf_t *upd_shelf, database_t *db){
 }
 
 cart_t* ioopm_create_cart(int id, database_t *db){
+    if(find_cart(id,db)!=NULL){
+        return NULL;
+    }
     cart_t *cart = calloc(1,sizeof(cart_t));
     cart->id = id;
     cart->items = ioopm_hash_table_create(ptr_hash,ptr_comp);
@@ -507,6 +509,10 @@ int ioopm_add_to_cart(item_t *item, int id, size_t quantity, database_t *db){
     //TODO check stock
     cart_t *cart = find_cart(id,db);
     ioopm_hash_table_t* cart_ht = cart->items;
+
+    if(cart==NULL){
+        return -2;
+    }
     
     //check if total stock is enought (have to go thru all carts too to check their carts to get available.)
     size_t total_stock = get_total_stock_of_db(item);

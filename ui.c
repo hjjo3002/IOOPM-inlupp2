@@ -165,9 +165,15 @@ static int ask_question_ioopm_replenish(database_t *db){
 
     return res;
 }
-
 static int ask_question_ioopm_add_to_cart(database_t *db){
     int id = ask_question_id();
+    cart_t * cart = find_cart(id,db);
+
+    while(cart==NULL){
+        id = ask_question_id();
+        cart = find_cart(id,db);
+    }
+
     char *name = ask_name("name of merch: ");
     size_t quantity = ask_quantity("quantity of item: ");
 
@@ -192,6 +198,13 @@ static void ask_question_stock(database_t *db){
 
 static int ask_question_ioopm_remove_from_cart(database_t *db){
     int id = ask_question_id();
+    
+    cart_t * cart = find_cart(id,db);
+    while(cart==NULL){
+        id = ask_question_id();
+        cart = find_cart(id,db);
+    }
+
     char *name = ask_name("name of merch: ");
     size_t quantity = ask_quantity("quantity of item: ");
 
@@ -292,6 +305,12 @@ static void ioopm_checkout_loop(database_t *db){
 
 static void ioopm_remove_cart_loop(database_t *db){
     int id = ask_question_id();
+
+    cart_t * cart = find_cart(id,db);
+     while(cart==NULL){
+        id = ask_question_id();
+        cart = find_cart(id,db);
+    }
         
     if(!yes_or_no()){
         return;
@@ -333,7 +352,11 @@ static bool choose_action(char answer,database_t *db){
     }
     if(answer=='C'){
         int id =ask_question_id();
-        ioopm_create_cart(id,db);
+
+        if(ioopm_create_cart(id,db)==NULL){
+            printf("Cart id taken\n");
+        }
+        
         return true;
 
     }
